@@ -1,7 +1,7 @@
 <?php
 /**
  * Table component
- * Usage: $this->include('components/table', ['headers' => ['No', 'Nama', 'Aksi'], 'slot' => '...'])
+ * Usage: view('components/table', ['headers' => ['No', 'Nama', 'Aksi'], 'slot' => '...'])
  */
 ?>
 <div class="overflow-x-auto">

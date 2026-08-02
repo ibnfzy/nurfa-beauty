@@ -11,7 +11,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Breadcrumb -->
-    <?= $this->include('components/breadcrumb', [
+    <?= view('components/breadcrumb', [
         'items' => [
             ['label' => 'Beranda', 'url' => base_url()],
             ['label' => 'Pesanan', 'url' => base_url('transactions')],
@@ -115,7 +115,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Status</p>
-                        <?= $this->include('components/badge', [
+                        <?= view('components/badge', [
                             'text'  => $statusConfig['text'],
                             'color' => $statusConfig['color'],
                         ]) ?>
@@ -130,7 +130,7 @@
                             default    => ['color' => 'gray', 'text' => ucfirst($transaction['payment_status'] ?? '')],
                         };
                         ?>
-                        <?= $this->include('components/badge', [
+                        <?= view('components/badge', [
                             'text'  => $payStatusConfig['text'],
                             'color' => $payStatusConfig['color'],
                         ]) ?>
@@ -187,7 +187,7 @@
                                         <td class="py-3 px-2">
                                             <div class="flex items-center gap-3">
                                                 <?php if (!empty($item['product_image'] ?? '')): ?>
-                                                    <img src="<?= base_url('writable/uploads/products/' . ($item['product_image'] ?? '')) ?>"
+                                                    <img src="<?= base_url('uploads/products/' . ($item['product_image'] ?? '')) ?>"
                                                         alt="<?= esc($item['product_name'] ?? '') ?>"
                                                         class="w-12 h-12 rounded-lg object-cover border border-gray-100">
                                                 <?php else: ?>
@@ -199,7 +199,7 @@
                                             </div>
                                         </td>
                                         <td class="py-3 px-2 text-right text-sm text-gray-700">
-                                            Rp <?= number_format($item['item_price'] ?? 0, 0, ',', '.') ?>
+                                            Rp <?= number_format($item['price'] ?? 0, 0, ',', '.') ?>
                                         </td>
                                         <td class="py-3 px-2 text-center text-sm text-gray-700">
                                             <?= $item['quantity'] ?? 0 ?>
@@ -237,7 +237,7 @@
                             }">
                                 <div class="flex items-center gap-3 mb-4">
                                     <?php if (!empty($item['product_image'] ?? '')): ?>
-                                        <img src="<?= base_url('writable/uploads/products/' . ($item['product_image'] ?? '')) ?>"
+                                        <img src="<?= base_url('uploads/products/' . ($item['product_image'] ?? '')) ?>"
                                             alt="<?= esc($item['product_name'] ?? '') ?>"
                                             class="w-10 h-10 rounded-lg object-cover border border-gray-100">
                                     <?php endif; ?>
@@ -329,7 +329,7 @@
                     <?php if (!empty($transaction['payment_proof'] ?? '')): ?>
                         <div class="mb-4">
                             <p class="text-sm text-gray-500 mb-2">Bukti Transfer</p>
-                            <img src="<?= base_url('writable/uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
                                 alt="Bukti Transfer"
                                 class="w-full rounded-lg border border-gray-100">
                         </div>
@@ -365,7 +365,7 @@
                     <?php if (!empty($transaction['payment_proof'] ?? '')): ?>
                         <div class="mb-4">
                             <p class="text-sm text-gray-500 mb-2">Bukti Transfer Sebelumnya</p>
-                            <img src="<?= base_url('writable/uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
                                 alt="Bukti Transfer"
                                 class="w-full rounded-lg border border-gray-100">
                         </div>
@@ -397,7 +397,7 @@
                     <?php if (!empty($transaction['payment_proof'] ?? '')): ?>
                         <div class="mt-4">
                             <p class="text-sm text-gray-500 mb-2">Bukti Transfer</p>
-                            <img src="<?= base_url('writable/uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
                                 alt="Bukti Transfer"
                                 class="w-full rounded-lg border border-gray-100">
                         </div>
@@ -408,7 +408,7 @@
                     <?php if (!empty($transaction['payment_proof'] ?? '')): ?>
                         <div>
                             <p class="text-sm text-gray-500 mb-2">Bukti Transfer</p>
-                            <img src="<?= base_url('writable/uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/payment_proofs/' . ($transaction['payment_proof'] ?? '')) ?>"
                                 alt="Bukti Transfer"
                                 class="w-full rounded-lg border border-gray-100">
                         </div>

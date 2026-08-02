@@ -63,7 +63,7 @@
     <?php endif; ?>
 
     <?php if (empty($products ?? [])): ?>
-        <?= $this->include('components/empty-state', [
+        <?= view('components/empty-state', [
             'icon'        => 'package-open',
             'title'       => 'Produk tidak ditemukan',
             'description' => 'Belum ada produk yang sesuai dengan pencarian atau filter Anda. Coba kata kunci lain.',
@@ -76,7 +76,7 @@
                     <!-- Image -->
                     <div class="aspect-square bg-gray-100 overflow-hidden relative">
                         <?php if (!empty($product['image'] ?? '')): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . ($product['image'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/products/' . ($product['image'] ?? '')) ?>"
                                 alt="<?= esc($product['name']) ?>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>
@@ -103,7 +103,7 @@
 
         <!-- Pagination -->
         <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
-            <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+            <?= view('components/pagination', ['pager' => $pager]) ?>
         <?php endif; ?>
     <?php endif; ?>
 </section>

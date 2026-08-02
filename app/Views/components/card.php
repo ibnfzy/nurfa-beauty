@@ -1,7 +1,7 @@
 <?php
 /**
  * Card component
- * Usage: $this->include('components/card', ['class' => '...', 'padding' => 'p-6'])
+ * Usage: view('components/card', ['class' => '...', 'padding' => 'p-6'])
  */
 ?>
 <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 <?= $padding ?? 'p-6' ?> <?= $class ?? '' ?>">

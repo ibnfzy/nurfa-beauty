@@ -22,6 +22,8 @@ class Register extends BaseController
 
     public function process()
     {
+        helper('text');
+
         $rules = [
             'name'     => 'required|min_length[3]|max_length[100]',
             'email'    => 'required|valid_email|is_unique[users.email]',

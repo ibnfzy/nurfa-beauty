@@ -8,7 +8,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Beranda', 'url' => base_url()],
         ['label' => 'Alamat Pengiriman'],
@@ -47,7 +47,7 @@
 
     <!-- Address List -->
     <?php if (empty($addresses ?? [])): ?>
-        <?= $this->include('components/empty-state', [
+        <?= view('components/empty-state', [
             'icon'        => 'map-pin',
             'title'       => 'Belum ada alamat',
             'description' => 'Tambahkan alamat pengiriman untuk mempermudah proses checkout.',
@@ -61,7 +61,7 @@
                             <div class="flex items-center gap-2 mb-2">
                                 <h3 class="font-semibold text-gray-800"><?= esc($addr['label'] ?? '') ?></h3>
                                 <?php if ($addr['is_default'] ?? false): ?>
-                                    <?= $this->include('components/badge', ['text' => 'Utama', 'color' => 'success']) ?>
+                                    <?= view('components/badge', ['text' => 'Utama', 'color' => 'success']) ?>
                                 <?php endif; ?>
                             </div>
                             <p class="text-sm font-medium text-gray-700"><?= esc($addr['recipient_name'] ?? '') ?></p>
@@ -103,7 +103,7 @@
     <?php endif; ?>
 
     <!-- Create Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showCreateModal',
         'title'   => 'Tambah Alamat',
         'slot'    => (function () {
@@ -161,7 +161,7 @@
     ]) ?>
 
     <!-- Edit Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showEditModal',
         'title'   => 'Edit Alamat',
         'slot'    => (function () {
@@ -219,7 +219,7 @@
     ]) ?>
 
     <!-- Delete Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar'   => 'showDeleteModal',
         'title'     => 'Hapus Alamat',
         'maxWidth'  => 'max-w-md',

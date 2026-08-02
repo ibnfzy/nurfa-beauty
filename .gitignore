@@ -136,3 +136,4 @@ writable/debugbar/*
 !writable/debugbar/*.html
 writable/cache/*
 !writable/cache/*.html
+.envrc

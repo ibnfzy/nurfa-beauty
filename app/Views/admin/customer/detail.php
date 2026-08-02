@@ -9,7 +9,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Pelanggan', 'url' => base_url('admin/customers')],
@@ -144,7 +144,7 @@
             </h3>
         </div>
         <?php if (empty($transactions)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'receipt',
                 'title'       => 'Belum ada transaksi',
                 'description' => 'Pelanggan ini belum memiliki riwayat transaksi.',
@@ -168,7 +168,7 @@
                     'cancelled'       => 'Dibatalkan',
                 ];
             ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['Tanggal', 'Kode Transaksi', 'Total', 'Status'],
                 'slot'    => (function() use ($transactions, $statusColors, $statusLabels, $badgeColorMap) {
                     $output = '';
@@ -202,7 +202,7 @@
             </h3>
         </div>
         <?php if (empty($pointsLog)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'star',
                 'title'       => 'Belum ada riwayat poin',
                 'description' => 'Pelanggan ini belum memiliki riwayat poin loyalitas.',
@@ -220,7 +220,7 @@
                     'expired' => 'Expired',
                 ];
             ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['Tanggal', 'Tipe', 'Poin', 'Keterangan'],
                 'slot'    => (function() use ($pointsLog, $pointTypeColors, $pointTypeLabels, $badgeColorMap) {
                     $output = '';
@@ -250,7 +250,7 @@
     </div>
 
     <!-- Edit Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showEditModal',
         'title'   => 'Edit Pelanggan',
         'slot'    => (function() use ($customer, $membershipLabels) {

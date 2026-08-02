@@ -72,7 +72,7 @@ class Report extends BaseController
         // Summary stats
         $summary = $this->db->table('transactions')
             ->select('COUNT(*) as total_transactions, COALESCE(SUM(final_amount), 0) as total_revenue, COALESCE(AVG(final_amount), 0) as avg_transaction')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->get()
@@ -106,7 +106,7 @@ class Report extends BaseController
             ->select('COUNT(*) as transaction_count')
             ->select('COALESCE(SUM(final_amount), 0) as period_revenue')
             ->select('COALESCE(AVG(final_amount), 0) as period_avg')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->groupBy('period_key')
@@ -135,7 +135,7 @@ class Report extends BaseController
             ->select('SUM(transaction_items.subtotal) as total_revenue')
             ->join('transactions', 'transactions.id = transaction_items.transaction_id')
             ->join('products', 'products.id = transaction_items.product_id')
-            ->where('transactions.status', 'completed')
+            ->whereIn('transactions.status', ['completed', 'paid'])
             ->where('transactions.transaction_date >=', $startDate . ' 00:00:00')
             ->where('transactions.transaction_date <=', $endDate . ' 23:59:59')
             ->groupBy('transaction_items.product_id')
@@ -172,13 +172,13 @@ class Report extends BaseController
 
         // New customers this month
         $newThisMonth = $this->customerModel
-            ->where('created_at >=', date('Y-m-01'))
+            ->where('customers.created_at >=', date('Y-m-01'))
             ->countAllResults(false);
 
         // Active customers (transacted in last 30 days)
         $activeCustomers = $this->db->table('transactions')
             ->select('COUNT(DISTINCT customer_id) as count')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', date('Y-m-d', strtotime('-30 days')))
             ->get()
             ->getRowArray();
@@ -233,7 +233,7 @@ class Report extends BaseController
         foreach ($topCustomers as &$cust) {
             $trxCount = $this->db->table('transactions')
                 ->where('customer_id', $cust['id'])
-                ->where('status', 'completed')
+                ->whereIn('status', ['completed', 'paid'])
                 ->countAllResults(false);
             $cust['transaction_count'] = $trxCount;
         }
@@ -244,7 +244,7 @@ class Report extends BaseController
             "SELECT COUNT(*) as count FROM (
                 SELECT customer_id
                 FROM transactions
-                WHERE status = 'completed'
+                WHERE status IN ('completed', 'paid')
                 GROUP BY customer_id
                 HAVING COUNT(*) > 1
             ) as repeat_customers"
@@ -392,7 +392,7 @@ class Report extends BaseController
 
         $summary = $this->db->table('transactions')
             ->select('COUNT(*) as total_transactions, COALESCE(SUM(final_amount), 0) as total_revenue, COALESCE(AVG(final_amount), 0) as avg_transaction')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->get()
@@ -402,7 +402,7 @@ class Report extends BaseController
             ->select("DATE(transaction_date) as period_label")
             ->select('COUNT(*) as transaction_count')
             ->select('COALESCE(SUM(final_amount), 0) as period_revenue')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->groupBy('period_label')
@@ -416,7 +416,7 @@ class Report extends BaseController
             ->select('SUM(transaction_items.subtotal) as total_revenue')
             ->join('transactions', 'transactions.id = transaction_items.transaction_id')
             ->join('products', 'products.id = transaction_items.product_id')
-            ->where('transactions.status', 'completed')
+            ->whereIn('transactions.status', ['completed', 'paid'])
             ->where('transactions.transaction_date >=', $startDate . ' 00:00:00')
             ->where('transactions.transaction_date <=', $endDate . ' 23:59:59')
             ->groupBy('transaction_items.product_id')
@@ -490,7 +490,7 @@ class Report extends BaseController
 
         $summary = $this->db->table('transactions')
             ->select('COUNT(*) as total_transactions, COALESCE(SUM(final_amount), 0) as total_revenue, COALESCE(AVG(final_amount), 0) as avg_transaction')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->get()
@@ -500,7 +500,7 @@ class Report extends BaseController
             ->select("DATE(transaction_date) as period_label")
             ->select('COUNT(*) as transaction_count')
             ->select('COALESCE(SUM(final_amount), 0) as period_revenue')
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->groupBy('period_label')
@@ -562,7 +562,7 @@ class Report extends BaseController
         $totalCustomers = $this->customerModel->countAllResults(false);
 
         $newThisMonth = $this->customerModel
-            ->where('created_at >=', date('Y-m-01'))
+            ->where('customers.created_at >=', date('Y-m-01'))
             ->countAllResults(false);
 
         $membershipDistribution = $this->db->table('customers')
@@ -636,7 +636,7 @@ class Report extends BaseController
         $totalCustomers = $this->customerModel->countAllResults(false);
 
         $newThisMonth = $this->customerModel
-            ->where('created_at >=', date('Y-m-01'))
+            ->where('customers.created_at >=', date('Y-m-01'))
             ->countAllResults(false);
 
         $topCustomers = $this->customerModel

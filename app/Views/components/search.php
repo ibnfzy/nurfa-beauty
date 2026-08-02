@@ -1,7 +1,7 @@
 <?php
 /**
  * Search component
- * Usage: $this->include('components/search', ['placeholder' => 'Cari produk...', 'action' => '/products'])
+ * Usage: view('components/search', ['placeholder' => 'Cari produk...', 'action' => '/products'])
  */
 ?>
 <form action="<?= $action ?? '' ?>" method="GET" class="relative">

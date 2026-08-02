@@ -20,7 +20,7 @@
 
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'     => 'Total Penjualan Bulan Ini',
             'value'     => 'Rp ' . number_format($totalPenjualanBulanIni ?? 0, 0, ',', '.'),
             'icon'      => 'wallet',
@@ -28,7 +28,7 @@
             'subtitle'  => date('F Y'),
         ]) ?>
 
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'     => 'Pelanggan Baru',
             'value'     => $pelangganBaruBulanIni ?? 0,
             'icon'      => 'user-plus',
@@ -36,7 +36,7 @@
             'subtitle'  => 'Bulan ini',
         ]) ?>
 
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'     => 'Stok Menipis',
             'value'     => $stokMenipis ?? 0,
             'icon'      => 'alert-triangle',
@@ -44,7 +44,7 @@
             'subtitle'  => 'Produk stok < 10',
         ]) ?>
 
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'     => 'Transaksi 7 Hari',
             'value'     => $transaksi7Hari ?? 0,
             'icon'      => 'shopping-bag',

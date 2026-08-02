@@ -29,6 +29,8 @@ class Checkout extends BaseController
 
     public function __construct()
     {
+        helper('text');
+
         $this->cartModel            = new CartModel();
         $this->customerModel        = new CustomerModel();
         $this->productModel         = new ProductModel();
@@ -394,6 +396,14 @@ class Checkout extends BaseController
             }
         }
 
+        // Tandai voucher manual sebagai terpakai
+        if ($appliedVoucher) {
+            $this->voucherModel->update($appliedVoucher['id'], [
+                'is_used' => 1,
+                'used_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
         // Tambah poin loyalitas
         helper('loyalty');
         $customer = $this->customerModel->find($customerId);
@@ -465,26 +475,29 @@ class Checkout extends BaseController
                 ->with('toast', ['type' => 'warning', 'message' => 'Transaksi ini tidak memerlukan upload bukti transfer.']);
         }
 
-        $rules = [
-            'payment_proof' => 'required|uploaded[payment_proof]|max_size[payment_proof,2048]|is_image[payment_proof]',
-        ];
+        $file = $this->request->getFile('payment_proof');
 
-        $messages = [
-            'payment_proof' => [
-                'required'   => 'Bukti transfer wajib diunggah.',
-                'uploaded'   => 'Bukti transfer wajib diunggah.',
-                'max_size'   => 'Ukuran file maksimal 2MB.',
-                'is_image'   => 'File harus berupa gambar.',
-            ],
-        ];
-
-        if (!$this->validate($rules, $messages)) {
+        // Validasi manual lebih detail
+        if (!$file || $file->getError() === 4) {
             return redirect()->back()
-                ->withInput()
-                ->with('toast', ['type' => 'error', 'message' => 'Gagal mengupload bukti transfer. Periksa kembali file Anda.']);
+                ->with('toast', ['type' => 'error', 'message' => 'Bukti transfer wajib diunggah.']);
         }
 
-        $file = $this->request->getFile('payment_proof');
+        if (!$file->isValid()) {
+            return redirect()->back()
+                ->with('toast', ['type' => 'error', 'message' => 'File tidak valid: ' . $file->getErrorString()]);
+        }
+
+        if ($file->getSize() > 2048 * 1024) {
+            return redirect()->back()
+                ->with('toast', ['type' => 'error', 'message' => 'Ukuran file maksimal 2MB. Ukuran file Anda: ' . round($file->getSize() / 1024) . 'KB.']);
+        }
+
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+        if (!in_array($file->getMimeType(), $allowedTypes)) {
+            return redirect()->back()
+                ->with('toast', ['type' => 'error', 'message' => 'File harus berupa gambar (JPG, PNG, GIF, WebP). Tipe file Anda: ' . $file->getMimeType()]);
+        }
 
         // Pastikan direktori ada
         $uploadPath = WRITEPATH . 'uploads/payment_proofs';

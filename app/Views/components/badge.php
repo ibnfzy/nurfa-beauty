@@ -1,7 +1,7 @@
 <?php
 /**
  * Badge component
- * Usage: <?= $this->include('components/badge', ['text' => 'Aktif', 'color' => 'success']) ?>
+ * Usage: <?= view('components/badge', ['text' => 'Aktif', 'color' => 'success']) ?>
  * Colors: success, warning, danger, info, primary, secondary, gray
  */
 $colorMap = [

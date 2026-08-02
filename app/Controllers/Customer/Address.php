@@ -129,7 +129,7 @@ class Address extends BaseController
             'is_default'     => $isDefault,
         ]);
 
-        return redirect()->to('/addresses')
+        return redirect()->to('/address')
             ->with('toast', ['type' => 'success', 'message' => 'Alamat berhasil ditambahkan!']);
     }
 
@@ -145,7 +145,7 @@ class Address extends BaseController
         $address = $this->addressModel->find($id);
 
         if (!$address || $address['customer_id'] != $customerId) {
-            return redirect()->to('/addresses')
+            return redirect()->to('/address')
                 ->with('toast', ['type' => 'error', 'message' => 'Alamat tidak ditemukan.']);
         }
 
@@ -215,7 +215,7 @@ class Address extends BaseController
             'is_default'     => $isDefault,
         ]);
 
-        return redirect()->to('/addresses')
+        return redirect()->to('/address')
             ->with('toast', ['type' => 'success', 'message' => 'Alamat berhasil diperbarui!']);
     }
 
@@ -231,13 +231,13 @@ class Address extends BaseController
         $address = $this->addressModel->find($id);
 
         if (!$address || $address['customer_id'] != $customerId) {
-            return redirect()->to('/addresses')
+            return redirect()->to('/address')
                 ->with('toast', ['type' => 'error', 'message' => 'Alamat tidak ditemukan.']);
         }
 
         $this->addressModel->delete($id);
 
-        return redirect()->to('/addresses')
+        return redirect()->to('/address')
             ->with('toast', ['type' => 'success', 'message' => 'Alamat berhasil dihapus!']);
     }
 
@@ -253,7 +253,7 @@ class Address extends BaseController
         $address = $this->addressModel->find($id);
 
         if (!$address || $address['customer_id'] != $customerId) {
-            return redirect()->to('/addresses')
+            return redirect()->to('/address')
                 ->with('toast', ['type' => 'error', 'message' => 'Alamat tidak ditemukan.']);
         }
 
@@ -263,7 +263,7 @@ class Address extends BaseController
         // Set this address as default
         $this->addressModel->update($id, ['is_default' => 1]);
 
-        return redirect()->to('/addresses')
+        return redirect()->to('/address')
             ->with('toast', ['type' => 'success', 'message' => 'Alamat utama berhasil diubah!']);
     }
 }

@@ -6,6 +6,28 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
+
+        // Re-initialize Lucide icons when DOM changes (for Alpine.js templates)
+        let iconTimeout;
+        const observer = new MutationObserver(function(mutations) {
+            let shouldReinit = false;
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1 && (node.hasAttribute('data-lucide') || node.querySelector('[data-lucide]'))) {
+                            shouldReinit = true;
+                        }
+                    });
+                }
+            });
+            if (shouldReinit) {
+                clearTimeout(iconTimeout);
+                iconTimeout = setTimeout(function() {
+                    lucide.createIcons();
+                }, 50);
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     });
 </script>
 

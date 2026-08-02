@@ -10,7 +10,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Verifikasi Pembayaran'],
@@ -45,7 +45,7 @@
 
     <!-- Search -->
     <div class="mb-6 max-w-md">
-        <?= $this->include('components/search', [
+        <?= view('components/search', [
             'placeholder' => 'Cari kode transaksi atau nama pelanggan...',
             'action'      => base_url('admin/payments') . (($filter ?? '') ? '?filter=' . ($filter ?? '') : ''),
         ]) ?>
@@ -54,7 +54,7 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
         <?php if (empty($transactions)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'credit-card',
                 'title'       => 'Tidak ada pembayaran',
                 'description' => ($filter ?? '') === 'verified' ? 'Belum ada pembayaran yang diverifikasi.' : (($filter ?? '') === 'rejected' ? 'Belum ada pembayaran yang ditolak.' : 'Tidak ada pembayaran yang menunggu verifikasi.'),
@@ -81,7 +81,7 @@
                 'gray'     => 'bg-gray-100 text-gray-600',
             ];
             ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Kode Transaksi', 'Pelanggan', 'Tanggal', 'Total', 'Bukti Transfer', 'Status', 'Aksi'],
                 'slot'    => (function () use ($transactions, $pager, $paymentColors, $paymentLabels, $badgeColorMap) {
                     $output = '';
@@ -100,7 +100,7 @@
                         $output .= '<td class="py-3 px-4 font-medium text-gray-800">Rp ' . number_format($trx['final_amount'] ?? 0, 0, ',', '.') . '</td>';
                         $output .= '<td class="py-3 px-4">';
                         if (!empty($trx['payment_proof'])) {
-                            $output .= '<img src="' . base_url('writable/uploads/payment_proofs/' . $trx['payment_proof']) . '" alt="Bukti" class="w-12 h-12 rounded-lg object-cover border border-gray-100">';
+                            $output .= '<img src="' . base_url('uploads/payment_proofs/' . $trx['payment_proof']) . '" alt="Bukti" class="w-12 h-12 rounded-lg object-cover border border-gray-100">';
                         } else {
                             $output .= '<span class="text-gray-400 italic text-sm">-</span>';
                         }
@@ -123,7 +123,7 @@
 
     <!-- Pagination -->
     <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
-        <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+        <?= view('components/pagination', ['pager' => $pager]) ?>
     <?php endif; ?>
 
 </div>

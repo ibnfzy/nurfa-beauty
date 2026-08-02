@@ -9,7 +9,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Promosi', 'url' => base_url('admin/promotions')],

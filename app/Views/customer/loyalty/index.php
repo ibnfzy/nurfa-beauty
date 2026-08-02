@@ -15,7 +15,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Breadcrumb -->
-    <?= $this->include('components/breadcrumb', [
+    <?= view('components/breadcrumb', [
         'items' => [
             ['label' => 'Beranda', 'url' => base_url()],
             ['label' => 'Loyalitas Saya'],
@@ -235,7 +235,7 @@
 
             <!-- Pagination -->
             <?php if ($pager && $pager->getPageCount() > 1): ?>
-                <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+                <?= view('components/pagination', ['pager' => $pager]) ?>
             <?php endif; ?>
         <?php endif; ?>
     </div>

@@ -42,7 +42,7 @@
     "scripts": {
         "test": "phpunit",
         "build:css": "npm run build:css",
-        "serve": "php spark serve --host 0.0.0.0 --port 8005",
+        "serve": "php spark serve --host 0.0.0.0 --port 8080",
         "dev": [
             "@build:css",
             "@serve"

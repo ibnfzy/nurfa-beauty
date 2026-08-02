@@ -53,6 +53,7 @@ $routes->group('admin', ['filter' => 'admin'], static function ($routes) {
     $routes->get('transactions/create', 'Admin\Transaction::create');
     $routes->post('transactions/store', 'Admin\Transaction::store');
     $routes->get('transactions/detail/(:num)', 'Admin\Transaction::detail/$1');
+    $routes->post('transactions/update-status/(:num)', 'Admin\Transaction::updateStatus/$1');
 
     // Payment Verification
     $routes->get('payments', 'Admin\Payment::index');

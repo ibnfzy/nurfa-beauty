@@ -11,7 +11,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Promosi'],
@@ -82,7 +82,7 @@
 
     <!-- Search -->
     <div class="mb-6 max-w-md">
-        <?= $this->include('components/search', [
+        <?= view('components/search', [
             'placeholder' => 'Cari nama promosi...',
             'action'      => base_url('admin/promotions') . '?' . (($typeFilter ?? '') ? 'type=' . $typeFilter . '&' : '') . (($segmentFilter ?? '') ? 'target_segment=' . $segmentFilter . '&' : ''),
         ]) ?>
@@ -91,7 +91,7 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
         <?php if (empty($promotions)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'megaphone',
                 'title'       => 'Belum ada promosi',
                 'description' => 'Mulai buat promosi untuk menarik pelanggan Anda.',
@@ -134,7 +134,7 @@
                 'gray'     => 'bg-gray-100 text-gray-600',
             ];
             ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Nama', 'Tipe', 'Diskon', 'Segment', 'Periode', 'Status', 'Jumlah Voucher', 'Aksi'],
                 'slot'    => (function () use ($promotions, $pager, $typeColors, $typeLabels, $segmentColors, $segmentLabels, $badgeColorMap) {
                     $output = '';
@@ -220,7 +220,7 @@
 
     <!-- Pagination -->
     <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
-        <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+        <?= view('components/pagination', ['pager' => $pager]) ?>
     <?php endif; ?>
 </div>
 

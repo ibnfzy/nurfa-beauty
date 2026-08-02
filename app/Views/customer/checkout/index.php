@@ -23,7 +23,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Breadcrumb -->
-    <?= $this->include('components/breadcrumb', [
+    <?= view('components/breadcrumb', [
         'items' => [
             ['label' => 'Beranda', 'url' => base_url()],
             ['label' => 'Keranjang', 'url' => base_url('cart')],
@@ -55,6 +55,9 @@
 
     <form action="<?= base_url('checkout/process') ?>" method="POST">
         <?= csrf_field() ?>
+        <?php if (!empty($voucherCodeInput ?? '')): ?>
+            <input type="hidden" name="voucher_code" value="<?= esc($voucherCodeInput) ?>">
+        <?php endif; ?>
 
         <div x-data="{
             selectedAddressId: <?= $defaultAddress['id'] ?? 0 ?>,
@@ -136,7 +139,7 @@
                                 <div class="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
                                     <div class="flex-shrink-0">
                                         <?php if (!empty($item['product_image'] ?? '')): ?>
-                                            <img src="<?= base_url('writable/uploads/products/' . ($item['product_image'] ?? '')) ?>"
+                                            <img src="<?= base_url('uploads/products/' . ($item['product_image'] ?? '')) ?>"
                                                 alt="<?= esc($item['product_name'] ?? '') ?>"
                                                 class="w-16 h-16 rounded-lg object-cover border border-gray-100">
                                         <?php else: ?>
@@ -234,28 +237,35 @@
                         <?php endif; ?>
 
                         <!-- Input Kode Voucher -->
-                        <div class="mb-4" x-data="{ showVoucherInput: false, voucherCode: '<?= esc($voucherCodeInput ?? '') ?>' }">
+                        <div class="mb-4" x-data="{ showVoucherInput: <?= !empty($voucherCodeInput ?? '') ? 'true' : 'false' ?>, voucherCode: '<?= esc($voucherCodeInput ?? '') ?>' }">
                             <?php if (!empty($appliedVoucher ?? [])): ?>
-                                <div class="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                                    <i data-lucide="ticket-check" class="w-5 h-5 text-green-600 flex-shrink-0"></i>
-                                    <div class="flex-1">
-                                        <p class="text-sm font-medium text-green-800">Voucher "<?= esc($appliedVoucher['code'] ?? '') ?>" diterapkan!</p>
-                                        <p class="text-xs text-green-600"><?= esc($appliedVoucher['promotion_name'] ?? '') ?></p>
+                                <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="ticket-check" class="w-5 h-5 text-green-600 flex-shrink-0"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-green-800">Voucher "<?= esc($appliedVoucher['code'] ?? '') ?>" diterapkan!</p>
+                                            <p class="text-xs text-green-600"><?= esc($appliedVoucher['promotion_name'] ?? $appliedVoucher['name'] ?? '') ?></p>
+                                        </div>
+                                        <a href="<?= base_url('checkout') ?>" class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50">Hapus</a>
                                     </div>
-                                    <a href="<?= base_url('checkout') ?>" class="text-xs text-red-500 hover:text-red-700">Hapus</a>
                                 </div>
                             <?php elseif (empty($firstPurchaseVoucher ?? [])): ?>
                                 <button type="button" @click="showVoucherInput = !showVoucherInput" 
                                     class="flex items-center gap-2 text-sm text-primary hover:text-primary-dark font-medium">
                                     <i data-lucide="ticket" class="w-4 h-4"></i>
                                     Punya kode voucher?
+                                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="showVoucherInput ? 'rotate-180' : ''"></i>
                                 </button>
-                                <div x-show="showVoucherInput" x-transition class="mt-2">
+                                <div x-show="showVoucherInput" x-transition class="mt-3">
                                     <div class="flex gap-2">
-                                        <input type="text" name="voucher_code" x-model="voucherCode" placeholder="Masukkan kode voucher..."
-                                            class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20">
+                                        <input type="text" x-model="voucherCode" placeholder="Masukkan kode voucher..."
+                                            class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 uppercase">
+                                        <a :href="'<?= base_url('checkout') ?>?voucher_code=' + voucherCode" 
+                                            class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors whitespace-nowrap">
+                                            Terapkan
+                                        </a>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Voucher akan diterapkan saat pesanan diproses</p>
+                                    <p class="text-xs text-gray-500 mt-2">Masukkan kode voucher dan klik Terapkan untuk melihat diskon</p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -303,7 +313,7 @@
                 <a href="<?= base_url('product/' . ($cp['id'] ?? '')) ?>" class="group bg-cream/50 rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                     <div class="aspect-square bg-gray-100 overflow-hidden">
                         <?php if (!empty($cp['image'] ?? '')): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . ($cp['image'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/products/' . ($cp['image'] ?? '')) ?>"
                                 alt="<?= esc($cp['name'] ?? '') ?>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>

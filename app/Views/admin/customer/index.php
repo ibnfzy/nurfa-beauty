@@ -9,7 +9,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Pelanggan'],
@@ -27,7 +27,7 @@
 
     <!-- Search -->
     <div class="mb-6 max-w-md">
-        <?= $this->include('components/search', [
+        <?= view('components/search', [
             'placeholder' => 'Cari nama atau email pelanggan...',
             'action'      => base_url('admin/customers'),
         ]) ?>
@@ -36,7 +36,7 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
         <?php if (empty($customers)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'users',
                 'title'       => 'Belum ada pelanggan',
                 'description' => 'Data pelanggan akan muncul di sini setelah ada yang mendaftar.',
@@ -56,7 +56,7 @@
                     'platinum' => 'Platinum',
                 ];
             ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Nama', 'Email', 'Telepon', 'Level', 'Poin', 'Total Belanja', 'Aksi'],
                 'slot'    => (function() use ($customers, $pager, $membershipColors, $membershipLabels) {
                     $output = '';
@@ -102,7 +102,7 @@
 
     <!-- Pagination -->
     <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
-        <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+        <?= view('components/pagination', ['pager' => $pager]) ?>
     <?php endif; ?>
 </div>
 

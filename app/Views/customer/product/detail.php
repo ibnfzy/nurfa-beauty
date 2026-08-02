@@ -15,7 +15,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Beranda', 'url' => base_url()],
         ['label' => $product['category_name'] ?? 'Produk', 'url' => base_url('?category=' . ($product['category_id'] ?? ''))],
@@ -50,7 +50,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="aspect-square bg-gray-50 flex items-center justify-center">
                 <?php if (!empty($product['image'])): ?>
-                    <img src="<?= base_url('writable/uploads/products/' . $product['image']) ?>"
+                    <img src="<?= base_url('uploads/products/' . $product['image']) ?>"
                         alt="<?= esc($product['name']) ?>"
                         class="w-full h-full object-cover">
                 <?php else: ?>
@@ -65,7 +65,7 @@
         <!-- Right: Product Info -->
         <div class="flex flex-col">
             <?php if (!empty($product['category_name'])): ?>
-                <?= $this->include('components/badge', ['text' => $product['category_name'], 'color' => 'primary']) ?>
+                <?= view('components/badge', ['text' => $product['category_name'], 'color' => 'primary']) ?>
             <?php endif; ?>
 
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-3 mb-4">
@@ -222,7 +222,7 @@
                 <div class="flex items-center gap-4 p-3 bg-cream/50 rounded-lg border border-gray-100">
                     <div class="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-100 overflow-hidden">
                         <?php if (!empty($comp['image'])): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . $comp['image']) ?>"
+                            <img src="<?= base_url('uploads/products/' . $comp['image']) ?>"
                                 alt="<?= esc($comp['name']) ?>"
                                 class="w-full h-full object-cover">
                         <?php else: ?>
@@ -256,7 +256,7 @@
                 <a href="<?= base_url('product/' . ($pp['id'] ?? '')) ?>" class="group bg-cream/50 rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                     <div class="aspect-square bg-gray-100 overflow-hidden relative">
                         <?php if (!empty($pp['image'] ?? '')): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . ($pp['image'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/products/' . ($pp['image'] ?? '')) ?>"
                                 alt="<?= esc($pp['name']) ?>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>
@@ -290,7 +290,7 @@
                 <a href="<?= base_url('product/' . ($cp['id'] ?? '')) ?>" class="group bg-cream/50 rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                     <div class="aspect-square bg-gray-100 overflow-hidden">
                         <?php if (!empty($cp['image'] ?? '')): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . ($cp['image'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/products/' . ($cp['image'] ?? '')) ?>"
                                 alt="<?= esc($cp['name']) ?>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>

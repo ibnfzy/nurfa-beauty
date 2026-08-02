@@ -11,7 +11,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Produk'],
@@ -46,7 +46,7 @@
     <!-- Search & Filter -->
     <div class="flex flex-col sm:flex-row gap-4 mb-6">
         <div class="flex-1 max-w-md">
-            <?= $this->include('components/search', [
+            <?= view('components/search', [
                 'placeholder' => 'Cari produk...',
                 'action'      => base_url('admin/products'),
             ]) ?>
@@ -69,7 +69,7 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
         <?php if (empty($products)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'package',
                 'title'       => 'Belum ada produk',
                 'description' => 'Mulai tambahkan produk untuk ditampilkan di toko Anda.',
@@ -77,7 +77,7 @@
                 'actionUrl'   => base_url('admin/products/create'),
             ]) ?>
         <?php else: ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Gambar', 'Nama Produk', 'Kategori', 'Harga', 'Stok', 'Status', 'Aksi'],
                 'slot'    => (function () use ($products, $pager) {
                     $output = '';
@@ -91,7 +91,7 @@
                         // Gambar
                         $output .= '<td class="py-3 px-4">';
                         if ($product['image']) {
-                            $output .= '<img src="' . base_url('writable/uploads/products/' . $product['image']) . '" alt="' . esc($product['name']) . '" class="w-12 h-12 rounded-lg object-cover border border-gray-100">';
+                            $output .= '<img src="' . base_url('uploads/products/' . $product['image']) . '" alt="' . esc($product['name']) . '" class="w-12 h-12 rounded-lg object-cover border border-gray-100">';
                         } else {
                             $output .= '<div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">';
                             $output .= '<i data-lucide="image" class="w-5 h-5 text-gray-400"></i>';
@@ -152,11 +152,11 @@
 
     <!-- Pagination -->
     <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
-        <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+        <?= view('components/pagination', ['pager' => $pager]) ?>
     <?php endif; ?>
 
     <!-- Delete Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar'   => 'showDeleteModal',
         'title'     => 'Hapus Produk',
         'maxWidth'  => 'max-w-md',

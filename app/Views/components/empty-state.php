@@ -1,7 +1,7 @@
 <?php
 /**
  * Empty State component
- * Usage: $this->include('components/empty-state', ['icon' => 'package', 'title' => 'Belum ada produk', 'description' => '...', 'actionText' => 'Tambah', 'actionUrl' => '/admin/products/create'])
+ * Usage: view('components/empty-state', ['icon' => 'package', 'title' => 'Belum ada produk', 'description' => '...', 'actionText' => 'Tambah', 'actionUrl' => '/admin/products/create'])
  */
 ?>
 <div class="flex flex-col items-center justify-center py-16 text-center">

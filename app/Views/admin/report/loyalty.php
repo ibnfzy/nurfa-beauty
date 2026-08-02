@@ -17,7 +17,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Laporan', 'url' => base_url('admin/report')],
@@ -48,19 +48,19 @@
 
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Total Poin Dikeluarkan',
             'value'   => number_format($totalIssued, 0, ',', '.'),
             'icon'    => 'plus-circle',
             'color'   => 'success',
         ]) ?>
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Total Poin Ditebus',
             'value'   => number_format($totalRedeemed, 0, ',', '.'),
             'icon'    => 'minus-circle',
             'color'   => 'warning',
         ]) ?>
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Poin Aktif',
             'value'   => number_format($activePoints, 0, ',', '.'),
             'icon'    => 'award',
@@ -117,7 +117,7 @@
             <h3 class="text-lg font-semibold text-gray-800">Distribusi per Membership</h3>
         </div>
         <?php if (empty($membershipStats)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'award',
                 'title'       => 'Belum ada data',
                 'description' => 'Belum ada data membership.',
@@ -126,7 +126,7 @@
             <?php
                 $levelLabels = ['bronze' => 'Bronze', 'silver' => 'Silver', 'gold' => 'Gold', 'platinum' => 'Platinum'];
             ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['Level', 'Jumlah Pelanggan', 'Rata-rata Poin', 'Total Spending'],
                 'slot'    => (function () use ($membershipStats, $levelLabels) {
                     $output = '';
@@ -161,13 +161,13 @@
             <h3 class="text-lg font-semibold text-gray-800">Transaksi Loyalitas Terakhir</h3>
         </div>
         <?php if (empty($recentTransactions)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'clock',
                 'title'       => 'Belum ada transaksi',
                 'description' => 'Belum ada transaksi loyalitas.',
             ]) ?>
         <?php else: ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Pelanggan', 'Tipe', 'Poin', 'Keterangan', 'Tanggal'],
                 'slot'    => (function () use ($recentTransactions) {
                     $output = '';

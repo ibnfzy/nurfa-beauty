@@ -7,9 +7,13 @@
 
 <?= $this->section('content') ?>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{
+    showDeleteModal: false,
+    deleteId: null,
+    deleteName: ''
+}">
     <!-- Breadcrumb -->
-    <?= $this->include('components/breadcrumb', [
+    <?= view('components/breadcrumb', [
         'items' => [
             ['label' => 'Beranda', 'url' => base_url()],
             ['label' => 'Wishlist Saya'],
@@ -40,7 +44,7 @@
                     <a href="<?= base_url('product/' . ($item['product_id'] ?? 0)) ?>" class="block relative">
                         <div class="aspect-square bg-gray-100 overflow-hidden">
                             <?php if (!empty($item['product_image'])): ?>
-                                <img src="<?= base_url('writable/uploads/products/' . $item['product_image']) ?>"
+                                <img src="<?= base_url('uploads/products/' . $item['product_image']) ?>"
                                     alt="<?= esc($item['product_name'] ?? '') ?>"
                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             <?php else: ?>
@@ -89,19 +93,42 @@
                                 </button>
                             <?php endif; ?>
 
-                            <form action="<?= base_url('wishlist/remove/' . ($item['id'] ?? 0)) ?>" method="POST"
-                                onsubmit="return confirm('Hapus dari wishlist?')">
-                                <?= csrf_field() ?>
-                                <button type="submit" class="inline-flex items-center justify-center p-2 text-gray-400 hover:text-danger hover:bg-red-50 rounded-lg transition-colors" title="Hapus dari wishlist">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </form>
+                            <button type="button"
+                                @click="deleteId = <?= $item['id'] ?? 0 ?>; deleteName = '<?= esc($item['product_name'] ?? '') ?>'; showDeleteModal = true"
+                                class="inline-flex items-center justify-center p-2 text-gray-400 hover:text-danger hover:bg-red-50 rounded-lg transition-colors"
+                                title="Hapus dari wishlist">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+
+    <!-- Delete Modal -->
+    <?= view('components/modal', [
+        'showVar'   => 'showDeleteModal',
+        'title'     => 'Hapus dari Wishlist',
+        'maxWidth'  => 'max-w-md',
+        'slot'      => (function () {
+            $output = '<div class="text-center">';
+            $output .= '<div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">';
+            $output .= '<i data-lucide="alert-triangle" class="w-8 h-8 text-danger"></i>';
+            $output .= '</div>';
+            $output .= '<h3 class="text-lg font-semibold text-gray-800 mb-2">Yakin ingin menghapus?</h3>';
+            $output .= '<p class="text-sm text-gray-500 mb-6">Produk <span class="font-semibold text-gray-700" x-text="deleteName"></span> akan dihapus dari wishlist.</p>';
+            $output .= '<div class="flex items-center justify-center gap-3">';
+            $output .= '<button type="button" @click="showDeleteModal = false" class="btn-secondary">Batal</button>';
+            $output .= '<form :action="\'/wishlist/remove/\' + deleteId" method="POST" class="inline">';
+            $output .= csrf_field();
+            $output .= '<button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-danger text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">Hapus</button>';
+            $output .= '</form>';
+            $output .= '</div>';
+            $output .= '</div>';
+            return $output;
+        })(),
+    ]) ?>
 </div>
 
 <?= $this->endSection() ?>

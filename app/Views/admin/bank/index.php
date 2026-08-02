@@ -7,7 +7,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Rekening Bank'],
@@ -47,14 +47,14 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
         <?php if (empty($banks)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'landmark',
                 'title'       => 'Belum ada rekening bank',
                 'description' => 'Mulai tambahkan rekening bank untuk menerima pembayaran.',
                 'actionText'  => 'Tambah Rekening',
             ]) ?>
         <?php else: ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Nama Bank', 'Nomor Rekening', 'Atas Nama', 'Status', 'Aksi'],
                 'slot'    => (function() use ($banks) {
                     $output = '';
@@ -91,7 +91,7 @@
     </div>
 
     <!-- Create Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showCreateModal',
         'title'   => 'Tambah Rekening Bank',
         'slot'    => (function() {
@@ -121,7 +121,7 @@
     ]) ?>
 
     <!-- Edit Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showEditModal',
         'title'   => 'Edit Rekening Bank',
         'slot'    => (function() {
@@ -157,7 +157,7 @@
     ]) ?>
 
     <!-- Delete Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar'   => 'showDeleteModal',
         'title'     => 'Hapus Rekening Bank',
         'maxWidth'  => 'max-w-md',

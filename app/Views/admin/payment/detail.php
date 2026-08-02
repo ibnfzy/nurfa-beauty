@@ -10,7 +10,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Verifikasi Pembayaran', 'url' => base_url('admin/payments')],
@@ -122,7 +122,7 @@
             </div>
             <div class="px-6 py-4">
                 <div class="inline-block rounded-xl shadow-md overflow-hidden border border-gray-200">
-                    <img src="<?= base_url('writable/uploads/payment_proofs/' . $transaction['payment_proof']) ?>" alt="Bukti Transfer" class="max-w-sm max-h-96 object-contain">
+                    <img src="<?= base_url('uploads/payment_proofs/' . $transaction['payment_proof']) ?>" alt="Bukti Transfer" class="max-w-sm max-h-96 object-contain">
                 </div>
             </div>
         </div>
@@ -137,13 +137,13 @@
             </h3>
         </div>
         <?php if (empty($items)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'package',
                 'title'       => 'Tidak ada item',
                 'description' => 'Transaksi ini tidak memiliki item.',
             ]) ?>
         <?php else: ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Produk', 'Harga', 'Jumlah', 'Subtotal'],
                 'slot'    => (function () use ($items) {
                     $output = '';
@@ -154,7 +154,7 @@
                         $output .= '<td class="py-3 px-4">';
                         $output .= '<div class="flex items-center gap-3">';
                         if (!empty($item['product_image'])) {
-                            $output .= '<img src="' . base_url('writable/uploads/products/' . $item['product_image']) . '" alt="' . esc($item['product_name'] ?? '') . '" class="w-10 h-10 rounded-lg object-cover border border-gray-100">';
+                            $output .= '<img src="' . base_url('uploads/products/' . $item['product_image']) . '" alt="' . esc($item['product_name'] ?? '') . '" class="w-10 h-10 rounded-lg object-cover border border-gray-100">';
                         } else {
                             $output .= '<div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">';
                             $output .= '<i data-lucide="image" class="w-4 h-4 text-gray-400"></i>';
@@ -163,7 +163,7 @@
                         $output .= '<span class="font-medium text-gray-800">' . esc($item['product_name'] ?? '-') . '</span>';
                         $output .= '</div>';
                         $output .= '</td>';
-                        $output .= '<td class="py-3 px-4 text-gray-600">Rp ' . number_format($item['item_price'] ?? 0, 0, ',', '.') . '</td>';
+                        $output .= '<td class="py-3 px-4 text-gray-600">Rp ' . number_format($item['price'] ?? 0, 0, ',', '.') . '</td>';
                         $output .= '<td class="py-3 px-4 text-gray-600">' . ($item['quantity'] ?? 0) . '</td>';
                         $output .= '<td class="py-3 px-4 font-medium text-gray-800">Rp ' . number_format($item['subtotal'] ?? 0, 0, ',', '.') . '</td>';
                         $output .= '</tr>';
@@ -268,7 +268,7 @@
     <?php $transaction = $transaction ?? [] ?>
 
     <!-- Rejection Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showRejectModal',
         'title'   => 'Tolak Pembayaran',
         'slot'    => (function () use ($transaction) {

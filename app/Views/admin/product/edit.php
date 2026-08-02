@@ -9,7 +9,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Produk', 'url' => base_url('admin/products')],
@@ -21,10 +21,16 @@
 
 <div x-data="{
     imagePreview: null,
-    currentImage: '<?= $product['image'] ? base_url('writable/uploads/products/' . $product['image']) : '' ?>',
+    currentImage: '<?= $product['image'] ? base_url('uploads/products/' . $product['image']) : '' ?>',
     isActive: <?= $product['is_active'] ? 'true' : 'false' ?>,
     isBundle: <?= ($product['is_bundle'] ?? 0) ? 'true' : 'false' ?>,
     bundleItems: <?= htmlspecialchars($product['bundle_products'] ?? '[]', ENT_QUOTES, 'UTF-8') ?>,
+    showLightbox: false,
+    lightboxImage: '',
+    openLightbox(src) {
+        this.lightboxImage = src;
+        this.showLightbox = true;
+    },
     handleImage(event) {
         const file = event.target.files[0];
         if (file) {
@@ -208,7 +214,7 @@
                                             </select>
                                             <input type="number" x-model.number="item.quantity" min="1" class="input-field w-20" placeholder="Qty">
                                             <button type="button" @click="removeBundleItem(index)" class="p-2 text-danger hover:bg-red-50 rounded-lg transition-colors">
-                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                                             </button>
                                         </div>
                                     </template>
@@ -235,7 +241,7 @@
                     <div x-show="currentImage && !imagePreview" class="mb-4">
                         <p class="text-xs text-gray-500 mb-2">Gambar saat ini:</p>
                         <div class="relative">
-                            <img :src="currentImage" class="w-full h-48 object-cover rounded-xl border border-gray-100" alt="Gambar produk">
+                            <img :src="currentImage" @click="openLightbox(currentImage)" class="w-full h-48 object-cover rounded-xl border border-gray-100 cursor-pointer hover:opacity-90 transition-opacity" alt="Gambar produk">
                             <label for="image" class="absolute bottom-2 right-2 cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/50 rounded-lg text-white text-xs font-medium hover:bg-black/70 transition-colors">
                                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                                 Ganti
@@ -305,6 +311,14 @@
             </div>
         </div>
     </form>
+
+    <!-- Lightbox Modal -->
+    <div x-show="showLightbox" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" @click.self="showLightbox = false" style="display: none;">
+        <button @click="showLightbox = false" class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+        <img :src="lightboxImage" class="max-w-full max-h-[90vh] object-contain rounded-lg" alt="Gambar produk">
+    </div>
 </div>
 
 <?= $this->endSection() ?>

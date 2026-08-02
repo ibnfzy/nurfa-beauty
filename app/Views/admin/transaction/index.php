@@ -10,7 +10,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Transaksi'],
@@ -34,7 +34,7 @@
     <!-- Search & Filter -->
     <div class="flex flex-col sm:flex-row gap-4 mb-6">
         <div class="flex-1 max-w-md">
-            <?= $this->include('components/search', [
+            <?= view('components/search', [
                 'placeholder' => 'Cari kode transaksi atau nama pelanggan...',
                 'action'      => base_url('admin/transactions'),
             ]) ?>
@@ -58,7 +58,7 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
         <?php if (empty($transactions ?? [])): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'receipt',
                 'title'       => 'Belum ada transaksi',
                 'description' => 'Transaksi akan muncul di sini setelah pelanggan melakukan pemesanan atau Anda menginput transaksi manual.',
@@ -104,7 +104,7 @@
             ];
             ?>
 
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Kode Transaksi', 'Pelanggan', 'Tanggal', 'Total', 'Status', 'Pembayaran', 'Aksi'],
                 'slot'    => (function () use ($transactions, $pager, $statusColors, $statusLabels, $paymentColors, $paymentLabels, $badgeColorMap) {
                     $output = '';
@@ -147,7 +147,7 @@
 
     <!-- Pagination -->
     <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
-        <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+        <?= view('components/pagination', ['pager' => $pager]) ?>
     <?php endif; ?>
 
 </div>

@@ -9,7 +9,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Kategori'],
@@ -48,7 +48,7 @@
 
     <!-- Search -->
     <div class="mb-6 max-w-md">
-        <?= $this->include('components/search', [
+        <?= view('components/search', [
             'placeholder' => 'Cari kategori...',
             'action'      => base_url('admin/categories'),
         ]) ?>
@@ -57,52 +57,41 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
         <?php if (empty($categories)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'tags',
                 'title'       => 'Belum ada kategori',
                 'description' => 'Mulai tambahkan kategori untuk mengelompokkan produk Anda.',
                 'actionText'  => 'Tambah Kategori',
             ]) ?>
         <?php else: ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Nama Kategori', 'Deskripsi', 'Jumlah Produk', 'Aksi'],
-                'slot'    => (function () use ($categories, $pager) {
-                    $output = '';
-                    $no = ($pager->getCurrentPage() - 1) * $pager->getPerPage() + 1;
-                    foreach ($categories as $category) {
-                        $desc = $category['description'] ? esc($category['description']) : '<span class="text-gray-400 italic">-</span>';
-                        $output .= '<tr class="hover:bg-cream/50 transition-colors">';
-                        $output .= '<td class="py-3 px-4 text-gray-500">' . $no++ . '</td>';
-                        $output .= '<td class="py-3 px-4 font-medium text-gray-800">' . esc($category['name']) . '</td>';
-                        $output .= '<td class="py-3 px-4 text-gray-600 max-w-xs truncate">' . $desc . '</td>';
-                        $output .= '<td class="py-3 px-4">';
-                        $output .= '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-light text-primary-dark">' . ($category['product_count'] ?? 0) . ' produk</span>';
-                        $output .= '</td>';
-                        $output .= '<td class="py-3 px-4">';
-                        $output .= '<div class="flex items-center gap-2">';
-                        $output .= '<button @click="openEdit(\'' . $category['id'] . '\', \'' . esc($category['name'], 'js') . '\', \'' . esc($category['description'] ?? '', 'js') . '\')" class="p-1.5 rounded-lg text-info hover:bg-blue-50 transition-colors" title="Edit">';
-                        $output .= '<i data-lucide="pencil" class="w-4 h-4"></i>';
-                        $output .= '</button>';
-                        $output .= '<button @click="openDelete(\'' . $category['id'] . '\', \'' . esc($category['name'], 'js') . '\')" class="p-1.5 rounded-lg text-danger hover:bg-red-50 transition-colors" title="Hapus">';
-                        $output .= '<i data-lucide="trash-2" class="w-4 h-4"></i>';
-                        $output .= '</button>';
-                        $output .= '</div>';
-                        $output .= '</td>';
-                        $output .= '</tr>';
-                    }
-                    return $output;
-                })(),
+                'slot'    => table_rows($categories, [
+                    ['key' => '#no', 'class' => 'text-gray-500'],
+                    ['key' => 'name', 'class' => 'font-medium text-gray-800'],
+                    ['key' => 'description', 'class' => 'text-gray-600 max-w-xs truncate'],
+                    ['render' => fn($row) => '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-light text-primary-dark">' . ($row['product_count'] ?? 0) . ' produk</span>'],
+                    ['render' => function ($row) {
+                        $id   = $row['id'];
+                        $name = esc($row['name'], 'js');
+                        $desc = esc($row['description'] ?? '', 'js');
+                        return '<div class="flex items-center gap-2">'
+                            . '<button @click="openEdit(\'' . $id . '\', \'' . $name . '\', \'' . $desc . '\')" class="p-1.5 rounded-lg text-info hover:bg-blue-50 transition-colors" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>'
+                            . '<button @click="openDelete(\'' . $id . '\', \'' . $name . '\')" class="p-1.5 rounded-lg text-danger hover:bg-red-50 transition-colors" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>'
+                            . '</div>';
+                    }],
+                ], $pager),
             ]) ?>
         <?php endif; ?>
     </div>
 
     <!-- Pagination -->
     <?php if (isset($pager) && $pager->getPageCount() > 1): ?>
-        <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+        <?= view('components/pagination', ['pager' => $pager]) ?>
     <?php endif; ?>
 
     <!-- Create Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showCreateModal',
         'title'   => 'Tambah Kategori',
         'slot'    => (function () {
@@ -128,7 +117,7 @@
     ]) ?>
 
     <!-- Edit Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar' => 'showEditModal',
         'title'   => 'Edit Kategori',
         'slot'    => (function () {
@@ -154,7 +143,7 @@
     ]) ?>
 
     <!-- Delete Modal -->
-    <?= $this->include('components/modal', [
+    <?= view('components/modal', [
         'showVar'   => 'showDeleteModal',
         'title'     => 'Hapus Kategori',
         'maxWidth'  => 'max-w-md',

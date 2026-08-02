@@ -15,7 +15,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Laporan', 'url' => base_url('admin/report')],
@@ -46,25 +46,25 @@
 
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Total Pelanggan',
             'value'   => number_format($totalCustomers, 0, ',', '.'),
             'icon'    => 'users',
             'color'   => 'primary',
         ]) ?>
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Pelanggan Baru (Bulan Ini)',
             'value'   => number_format($newThisMonth, 0, ',', '.'),
             'icon'    => 'user-plus',
             'color'   => 'success',
         ]) ?>
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Pelanggan Aktif (30 Hari)',
             'value'   => number_format($activeCount, 0, ',', '.'),
             'icon'    => 'activity',
             'color'   => 'info',
         ]) ?>
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Churn (Tidak Aktif 90 Hari)',
             'value'   => number_format($churnCount, 0, ',', '.'),
             'icon'    => 'user-x',
@@ -138,13 +138,13 @@
             <h3 class="text-lg font-semibold text-gray-800">Top 10 Pelanggan</h3>
         </div>
         <?php if (empty($topCustomers)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'users',
                 'title'       => 'Belum ada data',
                 'description' => 'Belum ada data pelanggan.',
             ]) ?>
         <?php else: ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Nama', 'Email', 'Level', 'Total Belanja', 'Jumlah Transaksi'],
                 'slot'    => (function () use ($topCustomers, $levelLabels) {
                     $output = '';

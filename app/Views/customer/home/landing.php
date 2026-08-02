@@ -157,7 +157,7 @@
                     <!-- Image -->
                     <div class="aspect-square bg-gray-100 overflow-hidden relative">
                         <?php if (!empty($product['image'] ?? '')): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . ($product['image'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/products/' . ($product['image'] ?? '')) ?>"
                                 alt="<?= esc($product['name']) ?>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>
@@ -206,7 +206,7 @@
                 <a href="<?= base_url('product/' . ($product['id'] ?? '')) ?>" class="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                     <div class="aspect-square bg-gray-100 overflow-hidden relative">
                         <?php if (!empty($product['image'] ?? '')): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . ($product['image'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/products/' . ($product['image'] ?? '')) ?>"
                                 alt="<?= esc($product['name']) ?>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>
@@ -247,7 +247,7 @@
                 <a href="<?= base_url('product/' . ($bundle['id'] ?? '')) ?>" class="group bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden hover:shadow-md transition-shadow">
                     <div class="aspect-square bg-gray-100 overflow-hidden relative">
                         <?php if (!empty($bundle['image'] ?? '')): ?>
-                            <img src="<?= base_url('writable/uploads/products/' . ($bundle['image'] ?? '')) ?>"
+                            <img src="<?= base_url('uploads/products/' . ($bundle['image'] ?? '')) ?>"
                                 alt="<?= esc($bundle['name']) ?>"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>

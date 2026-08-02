@@ -17,7 +17,7 @@
 <?= $this->section('content') ?>
 
 <!-- Breadcrumb -->
-<?= $this->include('components/breadcrumb', [
+<?= view('components/breadcrumb', [
     'items' => [
         ['label' => 'Dashboard', 'url' => base_url('admin')],
         ['label' => 'Laporan', 'url' => base_url('admin/report')],
@@ -77,19 +77,19 @@
 
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Total Pendapatan',
             'value'   => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
             'icon'    => 'dollar-sign',
             'color'   => 'success',
         ]) ?>
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Total Transaksi',
             'value'   => number_format($totalTransactions, 0, ',', '.'),
             'icon'    => 'receipt',
             'color'   => 'info',
         ]) ?>
-        <?= $this->include('components/stat-card', [
+        <?= view('components/stat-card', [
             'title'   => 'Rata-rata per Transaksi',
             'value'   => 'Rp ' . number_format($avgTransaction, 0, ',', '.'),
             'icon'    => 'bar-chart',
@@ -111,7 +111,7 @@
             <h3 class="text-lg font-semibold text-gray-800">Breakdown per Periode</h3>
         </div>
         <?php if (empty($breakdown)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'bar-chart',
                 'title'       => 'Belum ada data',
                 'description' => 'Tidak ada transaksi pada periode yang dipilih.',
@@ -124,7 +124,7 @@
                     default   => 'Tanggal',
                 };
             ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => [$periodLabel, 'Jumlah Transaksi', 'Pendapatan', 'Rata-rata'],
                 'slot'    => (function () use ($breakdown, $period) {
                     $output = '';
@@ -152,13 +152,13 @@
             <h3 class="text-lg font-semibold text-gray-800">Produk Terlaris</h3>
         </div>
         <?php if (empty($topProducts)): ?>
-            <?= $this->include('components/empty-state', [
+            <?= view('components/empty-state', [
                 'icon'        => 'package',
                 'title'       => 'Belum ada data',
                 'description' => 'Tidak ada produk terjual pada periode yang dipilih.',
             ]) ?>
         <?php else: ?>
-            <?= $this->include('components/table', [
+            <?= view('components/table', [
                 'headers' => ['No', 'Produk', 'Qty Terjual', 'Total Pendapatan'],
                 'slot'    => (function () use ($topProducts) {
                     $output = '';

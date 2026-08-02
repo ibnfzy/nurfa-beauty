@@ -8,6 +8,7 @@ use App\Models\TransactionItemModel;
 use App\Models\CustomerModel;
 use App\Models\ProductModel;
 use App\Models\BankAccountModel;
+use App\Models\UserModel;
 
 class Transaction extends BaseController
 {
@@ -19,6 +20,7 @@ class Transaction extends BaseController
 
     public function __construct()
     {
+        helper('text');
         $this->transactionModel     = new TransactionModel();
         $this->transactionItemModel = new TransactionItemModel();
         $this->customerModel        = new CustomerModel();
@@ -84,8 +86,11 @@ class Transaction extends BaseController
 
     public function store()
     {
+        $customerType = $this->request->getPost('customer_type');
+
+        // Validasi dasar
         $rules = [
-            'customer_id'        => 'required|integer',
+            'customer_type'      => 'required|in_list[existing,guest]',
             'items'              => 'required',
             'items.*.product_id' => 'required|integer',
             'items.*.quantity'   => 'required|integer|greater_than[0]',
@@ -93,9 +98,9 @@ class Transaction extends BaseController
         ];
 
         $messages = [
-            'customer_id' => [
-                'required' => 'Pelanggan wajib dipilih.',
-                'integer'  => 'Pelanggan tidak valid.',
+            'customer_type' => [
+                'required' => 'Tipe pelanggan wajib dipilih.',
+                'in_list'  => 'Tipe pelanggan tidak valid.',
             ],
             'items' => [
                 'required' => 'Minimal satu produk harus ditambahkan.',
@@ -111,6 +116,28 @@ class Transaction extends BaseController
             ],
         ];
 
+        // Validasi berdasarkan tipe pelanggan
+        if ($customerType === 'existing') {
+            $rules['customer_id'] = 'required|integer';
+            $messages['customer_id'] = [
+                'required' => 'Pelanggan wajib dipilih.',
+                'integer'  => 'Pelanggan tidak valid.',
+            ];
+        } elseif ($customerType === 'guest') {
+            $rules['guest_name']  = 'required|min_length[3]|max_length[100]';
+            $rules['guest_email'] = 'required|valid_email|is_unique[users.email]';
+            $messages['guest_name'] = [
+                'required'   => 'Nama pelanggan wajib diisi.',
+                'min_length' => 'Nama minimal 3 karakter.',
+                'max_length' => 'Nama maksimal 100 karakter.',
+            ];
+            $messages['guest_email'] = [
+                'required'    => 'Email pelanggan wajib diisi.',
+                'valid_email' => 'Format email tidak valid.',
+                'is_unique'   => 'Email sudah terdaftar. Pilih pelanggan dari daftar yang sudah ada.',
+            ];
+        }
+
         if (!$this->validate($rules, $messages)) {
             return redirect()->back()
                 ->withInput()
@@ -118,8 +145,40 @@ class Transaction extends BaseController
                 ->with('toast', ['type' => 'error', 'message' => 'Gagal menyimpan transaksi. Periksa kembali data Anda.']);
         }
 
-        $items      = $this->request->getPost('items');
-        $customerId = $this->request->getPost('customer_id');
+        // Buat akun guest jika tipe guest
+        $customerId = null;
+        $guestPassword = null;
+
+        if ($customerType === 'guest') {
+            $userModel = new UserModel();
+            $guestPassword = random_string('numeric', 6);
+
+            $userId = $userModel->insert([
+                'name'     => $this->request->getPost('guest_name'),
+                'email'    => $this->request->getPost('guest_email'),
+                'password' => password_hash($guestPassword, PASSWORD_DEFAULT),
+                'role'     => 'customer',
+            ]);
+
+            if (!$userId) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('toast', ['type' => 'error', 'message' => 'Gagal membuat akun pelanggan guest. Silakan coba lagi.']);
+            }
+
+            $this->customerModel->insert([
+                'user_id'          => $userId,
+                'loyalty_points'   => 0,
+                'membership_level' => 'bronze',
+                'total_spending'   => 0,
+            ]);
+
+            $customerId = $this->customerModel->getInsertID();
+        } else {
+            $customerId = $this->request->getPost('customer_id');
+        }
+
+        $items = $this->request->getPost('items');
 
         $totalAmount = 0;
         $transactionItems = [];
@@ -206,6 +265,15 @@ class Transaction extends BaseController
             ]);
         }
 
+        // Pesan sukses berbeda untuk guest
+        if ($customerType === 'guest') {
+            return redirect()->to('/admin/transactions')
+                ->with('toast', [
+                    'type' => 'success',
+                    'message' => 'Transaksi berhasil disimpan! Akun guest telah dibuat. Password: ' . $guestPassword . ' (Simpan password ini untuk pelanggan)',
+                ]);
+        }
+
         return redirect()->to('/admin/transactions')
             ->with('toast', ['type' => 'success', 'message' => 'Transaksi berhasil disimpan!']);
     }
@@ -255,5 +323,67 @@ class Transaction extends BaseController
         ];
 
         return view('admin/transaction/detail', $data);
+    }
+
+    public function updateStatus($id)
+    {
+        $transaction = $this->transactionModel->find($id);
+
+        if (!$transaction) {
+            return redirect()->to('/admin/transactions')
+                ->with('toast', ['type' => 'error', 'message' => 'Transaksi tidak ditemukan.']);
+        }
+
+        $newStatus = $this->request->getPost('status');
+        $allowedTransitions = [
+            'processing'  => 'shipped',
+            'shipped'     => 'completed',
+        ];
+
+        $currentStatus = $transaction['status'];
+
+        if (!isset($allowedTransitions[$currentStatus]) || $allowedTransitions[$currentStatus] !== $newStatus) {
+            return redirect()->to('/admin/transactions/detail/' . $id)
+                ->with('toast', ['type' => 'error', 'message' => 'Perubahan status tidak valid.']);
+        }
+
+        $this->transactionModel->update($id, ['status' => $newStatus]);
+
+        // Kirim notifikasi ke customer
+        $notificationModel = new \App\Models\NotificationModel();
+        $customerId = $transaction['customer_id'];
+        $transactionCode = $transaction['transaction_code'] ?? '';
+
+        $statusMessages = [
+            'shipped'  => [
+                'title'   => 'Pesanan Sedang Dikirim!',
+                'message' => 'Pesanan Anda dengan kode ' . $transactionCode . ' sedang dalam perjalanan. Silakan cek detail pesanan untuk informasi lebih lanjut.',
+                'type'    => 'order',
+            ],
+            'completed' => [
+                'title'   => 'Pesanan Selesai!',
+                'message' => 'Pesanan Anda dengan kode ' . $transactionCode . ' telah selesai. Terima kasih telah berbelanja di Nurfa Beauty!',
+                'type'    => 'order',
+            ],
+        ];
+
+        if (isset($statusMessages[$newStatus])) {
+            $msg = $statusMessages[$newStatus];
+            $notificationModel->insert([
+                'customer_id' => $customerId,
+                'title'       => $msg['title'],
+                'message'     => $msg['message'],
+                'type'        => $msg['type'],
+                'is_read'     => 0,
+            ]);
+        }
+
+        $statusLabels = [
+            'shipped'   => 'Dikirim',
+            'completed' => 'Selesai',
+        ];
+
+        return redirect()->to('/admin/transactions/detail/' . $id)
+            ->with('toast', ['type' => 'success', 'message' => 'Status transaksi berhasil diubah menjadi ' . ($statusLabels[$newStatus] ?? $newStatus) . '!']);
     }
 }

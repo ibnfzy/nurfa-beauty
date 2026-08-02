@@ -1,7 +1,7 @@
 <?php
 /**
  * Stat Card component
- * Usage: $this->include('components/stat-card', ['title' => 'Total Penjualan', 'value' => 'Rp 1.000.000', 'icon' => 'dollar-sign', 'color' => 'primary'])
+ * Usage: view('components/stat-card', ['title' => 'Total Penjualan', 'value' => 'Rp 1.000.000', 'icon' => 'dollar-sign', 'color' => 'primary'])
  */
 $colorMap = [
     'primary'   => 'bg-primary-light text-primary-dark',

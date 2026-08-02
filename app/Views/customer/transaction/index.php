@@ -12,7 +12,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Breadcrumb -->
-    <?= $this->include('components/breadcrumb', [
+    <?= view('components/breadcrumb', [
         'items' => [
             ['label' => 'Beranda', 'url' => base_url()],
             ['label' => 'Pesanan Saya'],
@@ -55,7 +55,7 @@
 
     <?php if (empty($transactions)): ?>
         <!-- Empty State -->
-        <?= $this->include('components/empty-state', [
+        <?= view('components/empty-state', [
             'icon'        => 'package',
             'title'       => 'Belum ada pesanan',
             'description' => 'Anda belum memiliki pesanan. Mulai belanja sekarang!',
@@ -82,7 +82,7 @@
                         <div>
                             <div class="flex items-center gap-3 mb-1">
                                 <h3 class="font-semibold text-gray-800"><?= esc($trx['transaction_code'] ?? '') ?></h3>
-                                <?= $this->include('components/badge', [
+                                <?= view('components/badge', [
                                     'text'  => $statusConfig['text'],
                                     'color' => $statusConfig['color'],
                                 ]) ?>
@@ -114,7 +114,7 @@
 
         <!-- Pagination -->
         <?php if ($pager && $pager->getPageCount() > 1): ?>
-            <?= $this->include('components/pagination', ['pager' => $pager]) ?>
+            <?= view('components/pagination', ['pager' => $pager]) ?>
         <?php endif; ?>
     <?php endif; ?>
 </div>

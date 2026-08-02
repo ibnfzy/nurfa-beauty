@@ -1,7 +1,7 @@
 <?php
 /**
  * Product Card component
- * Usage: $this->include('components/product-card', ['product' => $product])
+ * Usage: view('components/product-card', ['product' => $product])
  */
 $product = $product ?? null;
 if ($product):

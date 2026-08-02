@@ -1,10 +1,10 @@
 <?php
 /**
  * Breadcrumb component
- * Usage: $this->include('components/breadcrumb', ['items' => [['label' => 'Home', 'url' => '/'], ['label' => 'Produk']])
+ * Usage: view('components/breadcrumb', ['items' => [['label' => 'Home', 'url' => '/'], ['label' => 'Produk']])
  */
 ?>
-<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+<nav class="flex items-center gap-2 text-sm text-gray-500 mb-6 pl-4 py-2">
     <a href="<?= base_url() ?>" class="hover:text-primary transition-colors">
         <i data-lucide="home" class="w-4 h-4"></i>
     </a>
