@@ -5,3 +5,6 @@
 
 <!-- Tailwind CSS -->
 <link rel="stylesheet" href="<?= base_url('css/app.css') ?>">
+
+<!-- Alpine.js x-cloak: sembunyikan elemen sebelum Alpine init -->
+<style>[x-cloak] { display: none !important; }</style>
