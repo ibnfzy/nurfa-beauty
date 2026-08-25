@@ -500,7 +500,7 @@ class Checkout extends BaseController
         }
 
         // Pastikan direktori ada
-        $uploadPath = WRITEPATH . 'uploads/payment_proofs';
+        $uploadPath = FCPATH . 'uploads/payment_proofs';
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0777, true);
         }

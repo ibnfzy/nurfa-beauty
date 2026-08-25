@@ -100,7 +100,7 @@ class Product extends BaseController
 
         $image = $this->request->getFile('image');
         $imageName = $image->getRandomName();
-        $image->move(WRITEPATH . 'uploads/products', $imageName);
+        $image->move(FCPATH . 'uploads/products', $imageName);
 
         $this->productModel->save([
             'category_id'    => $this->request->getPost('category_id'),
@@ -206,14 +206,14 @@ class Product extends BaseController
         if ($image && $image->isValid() && !$image->hasMoved()) {
             // Delete old image
             if ($product['image']) {
-                $oldPath = WRITEPATH . 'uploads/products/' . $product['image'];
+                $oldPath = FCPATH . 'uploads/products/' . $product['image'];
                 if (is_file($oldPath)) {
                     unlink($oldPath);
                 }
             }
 
             $imageName = $image->getRandomName();
-            $image->move(WRITEPATH . 'uploads/products', $imageName);
+            $image->move(FCPATH . 'uploads/products', $imageName);
             $data['image'] = $imageName;
         }
 
@@ -234,7 +234,7 @@ class Product extends BaseController
 
         // Delete image file
         if ($product['image']) {
-            $imagePath = WRITEPATH . 'uploads/products/' . $product['image'];
+            $imagePath = FCPATH . 'uploads/products/' . $product['image'];
             if (is_file($imagePath)) {
                 unlink($imagePath);
             }
