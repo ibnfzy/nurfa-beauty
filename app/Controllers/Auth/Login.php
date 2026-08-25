@@ -19,14 +19,13 @@ class Login extends BaseController
     public function process()
     {
         $rules = [
-            'email'    => 'required|valid_email',
+            'email'    => 'required',
             'password' => 'required|min_length[6]',
         ];
 
         $messages = [
             'email' => [
-                'required'    => 'Email wajib diisi.',
-                'valid_email' => 'Format email tidak valid.',
+                'required'    => 'Username wajib diisi.',
             ],
             'password' => [
                 'required'    => 'Password wajib diisi.',
@@ -46,7 +45,7 @@ class Login extends BaseController
 
         if (!$user || !password_verify($password, $user['password'])) {
             return redirect()->back()->withInput()
-                ->with('toast', ['type' => 'error', 'message' => 'Email atau password salah.']);
+                ->with('toast', ['type' => 'error', 'message' => 'Username atau password salah.']);
         }
 
         // Set session

@@ -26,7 +26,7 @@ class Register extends BaseController
 
         $rules = [
             'name'     => 'required|min_length[3]|max_length[100]',
-            'email'    => 'required|valid_email|is_unique[users.email]',
+            'email'    => 'required|is_unique[users.email]',
             'password' => 'required|min_length[6]',
             'pass_confirm' => 'required|matches[password]',
         ];
@@ -38,9 +38,8 @@ class Register extends BaseController
                 'max_length'  => 'Nama maksimal 100 karakter.',
             ],
             'email' => [
-                'required'    => 'Email wajib diisi.',
-                'valid_email' => 'Format email tidak valid.',
-                'is_unique'   => 'Email sudah terdaftar.',
+                'required'    => 'Username wajib diisi.',
+                'is_unique'   => 'Username sudah terdaftar.',
             ],
             'password' => [
                 'required'    => 'Password wajib diisi.',
