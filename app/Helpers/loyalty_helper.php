@@ -111,3 +111,80 @@ if (!function_exists('calculate_bonus_points')) {
         return 0;
     }
 }
+
+if (!function_exists('get_monthly_behavior_reward')) {
+    /**
+     * Dapatkan reward promo perilaku pelanggan berdasarkan jumlah produk yang dibeli per bulan.
+     *
+     * Tingkat reward:
+     * - Beli >= 10 produk / bulan: Reward Super Fan (Diskon 15% / Rp 50.000 + 100 Poin)
+     * - Beli >= 5 produk / bulan:  Reward Loyal Shopper (Diskon 10% / Rp 25.000 + 50 Poin)
+     * - Beli >= 3 produk / bulan:  Reward Smart Buyer (Diskon 5% / Rp 10.000 + 20 Poin)
+     *
+     * @param int $monthlyProductCount Total produk dibeli bulan berjalan
+     * @return array
+     */
+    function get_monthly_behavior_reward(int $monthlyProductCount): array
+    {
+        $tiers = [
+            [
+                'target'       => 10,
+                'title'        => 'Super Fan Reward',
+                'badge'        => '10+ Produk / Bulan',
+                'discount_pct' => 15,
+                'max_discount' => 50000,
+                'bonus_points' => 100,
+                'description'  => 'Diskon 15% (maks Rp 50.000) + Bonus 100 Poin Loyalitas',
+            ],
+            [
+                'target'       => 5,
+                'title'        => 'Loyal Shopper Reward',
+                'badge'        => '5+ Produk / Bulan',
+                'discount_pct' => 10,
+                'max_discount' => 25000,
+                'bonus_points' => 50,
+                'description'  => 'Diskon 10% (maks Rp 25.000) + Bonus 50 Poin Loyalitas',
+            ],
+            [
+                'target'       => 3,
+                'title'        => 'Smart Buyer Reward',
+                'badge'        => '3+ Produk / Bulan',
+                'discount_pct' => 5,
+                'max_discount' => 10000,
+                'bonus_points' => 20,
+                'description'  => 'Diskon 5% (maks Rp 10.000) + Bonus 20 Poin Loyalitas',
+            ],
+        ];
+
+        $currentReward = null;
+        $nextTarget    = null;
+
+        foreach ($tiers as $tier) {
+            if ($monthlyProductCount >= $tier['target']) {
+                $currentReward = $tier;
+                break;
+            }
+        }
+
+        // Cari target tier berikutnya
+        $reversed = array_reverse($tiers);
+        foreach ($reversed as $tier) {
+            if ($monthlyProductCount < $tier['target']) {
+                $nextTarget = [
+                    'target'    => $tier['target'],
+                    'title'     => $tier['title'],
+                    'remaining' => $tier['target'] - $monthlyProductCount,
+                    'progress'  => round(($monthlyProductCount / $tier['target']) * 100, 1),
+                ];
+                break;
+            }
+        }
+
+        return [
+            'monthly_product_count' => $monthlyProductCount,
+            'active_reward'         => $currentReward,
+            'next_target'           => $nextTarget,
+            'is_qualified'          => $currentReward !== null,
+        ];
+    }
+}

@@ -44,6 +44,21 @@ class Loyalty extends BaseController
 
         $pager = $this->loyaltyPointsLogModel->pager;
 
+        // Hitung akumulasi produk yang dibeli bulan ini (Promo Perilaku Belanja)
+        $db = \Config\Database::connect();
+        $monthlyRow = $db->table('transaction_items')
+            ->join('transactions', 'transactions.id = transaction_items.transaction_id')
+            ->where('transactions.customer_id', $customer['id'])
+            ->whereIn('transactions.status', ['completed', 'paid'])
+            ->where('MONTH(transactions.transaction_date)', (int) date('m'))
+            ->where('YEAR(transactions.transaction_date)', (int) date('Y'))
+            ->selectSum('transaction_items.quantity', 'total_qty')
+            ->get()
+            ->getRow();
+
+        $monthlyProductCount   = (int) ($monthlyRow->total_qty ?? 0);
+        $monthlyBehaviorReward = get_monthly_behavior_reward($monthlyProductCount);
+
         // Voucher aktif milik customer
         $vouchers = $this->voucherModel
             ->join('promotions', 'promotions.id = vouchers.promotion_id')
@@ -55,14 +70,16 @@ class Loyalty extends BaseController
             ->findAll();
 
         $data = [
-            'pageTitle'    => 'Loyalitas Saya',
-            'customer'     => $customer ?? [],
-            'level'        => $level,
-            'benefits'     => $benefits,
-            'nextLevel'    => $nextLevel,
-            'pointHistory' => $pointHistory ?? [],
-            'pager'        => $pager ?? null,
-            'vouchers'     => $vouchers ?? [],
+            'pageTitle'              => 'Loyalitas Saya',
+            'customer'               => $customer ?? [],
+            'level'                  => $level,
+            'benefits'               => $benefits,
+            'nextLevel'              => $nextLevel,
+            'pointHistory'           => $pointHistory ?? [],
+            'pager'                  => $pager ?? null,
+            'vouchers'               => $vouchers ?? [],
+            'monthlyProductCount'    => $monthlyProductCount,
+            'monthlyBehaviorReward'  => $monthlyBehaviorReward,
         ];
 
         return view('customer/loyalty/index', $data);

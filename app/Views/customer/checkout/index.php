@@ -17,6 +17,8 @@
 /** @var array $crossSellProducts */
 /** @var array|null $appliedVoucher */
 /** @var string|null $voucherCodeInput */
+/** @var int $monthlyProductCount */
+/** @var array|null $behaviorReward */
 ?>
 
 <?= $this->section('content') ?>
@@ -233,6 +235,34 @@
                                 <p class="text-sm font-medium text-green-800">Voucher Digunakan!</p>
                                 <p class="text-xs text-green-600">Diskon pembelian pertama otomatis diterapkan</p>
                             </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Promo Perilaku Pelanggan (Bulanan) -->
+                        <?php if (!empty($behaviorReward['is_qualified']) && empty($firstPurchaseVoucher)): ?>
+                        <div class="mb-4 bg-pink-50 border border-primary/30 rounded-lg p-3">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
+                                    <p class="text-xs font-bold text-primary-dark">Reward Perilaku Bulanan</p>
+                                </div>
+                                <span class="bg-primary-light text-primary-dark text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                    <?= esc($behaviorReward['active_reward']['badge'] ?? '') ?>
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-2">
+                                Anda telah membeli <strong><?= (int) $monthlyProductCount ?> produk</strong> bulan ini dan berhak mendapatkan <?= esc($behaviorReward['active_reward']['description'] ?? '') ?>!
+                            </p>
+                            <?php if (($voucherCodeInput ?? '') === 'BEHAVIOR_REWARD'): ?>
+                                <div class="flex items-center justify-between bg-white px-2.5 py-1.5 rounded border border-green-300 text-xs text-green-700 font-semibold">
+                                    <span>Reward Sedang Digunakan</span>
+                                    <a href="<?= base_url('checkout') ?>" class="text-red-500 hover:underline">Batal</a>
+                                </div>
+                            <?php else: ?>
+                                <a href="<?= base_url('checkout?voucher_code=BEHAVIOR_REWARD') ?>" class="inline-flex items-center justify-center w-full py-1.5 bg-primary hover:bg-primary-dark text-white rounded text-xs font-semibold transition-colors">
+                                    Gunakan Reward Perilaku
+                                </a>
+                            <?php endif; ?>
                         </div>
                         <?php endif; ?>
 

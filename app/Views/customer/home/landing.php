@@ -34,29 +34,68 @@
 <?php endif; ?>
 
 <!-- Hero Split: headline kiri + ilustrasi kanan -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-        <!-- Kiri: headline + CTA -->
+        <!-- Kiri: headline + CTA (Tahap GET: Sambutan hangat & Menarik Perhatian) -->
         <div class="fade-up order-2 md:order-1">
-            <span class="text-xs font-poppins font-semibold uppercase tracking-widest text-primary-dark mb-4 block">
-                Nurfa Beauty
-            </span>
-            <h1 class="text-4xl sm:text-5xl font-playfair font-bold text-gray-900 leading-tight mb-5">
-                Cantik dari<br>dalam &amp; luar
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary-dark text-xs font-semibold uppercase tracking-wider mb-4">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-primary"></i>
+                Selamat Datang di Toko Nurfa Beauty
+            </div>
+            
+            <h1 class="text-3xl sm:text-5xl font-playfair font-bold text-gray-900 leading-tight mb-4">
+                Pancarkan Pesona Cantik Alami <span class="text-primary italic">Setiap Hari</span>
             </h1>
-            <p class="text-gray-500 text-sm sm:text-base leading-relaxed mb-8 max-w-md">
-                Produk kecantikan berkualitas untuk perawatan kulit, rambut, dan tubuh. Kualitas terjamin, harga terjangkau.
+            
+            <p class="text-gray-600 text-sm sm:text-base leading-relaxed mb-6 max-w-lg">
+                Temukan rangkaian skincare, bodycare, dan hair treatment pilihan dengan kualitas terjamin. Nikmati kemudahan berbelanja online praktis dari rumah atau kunjungi langsung toko offline kami!
             </p>
-            <div class="flex flex-wrap items-center gap-3">
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-wrap items-center gap-3 mb-8">
                 <a href="<?= base_url('catalog') ?>"
-                   class="inline-flex items-center gap-2 bg-primary text-white font-semibold px-6 py-3 rounded-xl shadow-sm hover:bg-primary-dark transition-colors text-sm">
-                    <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                    Mulai Belanja
+                   class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-3.5 rounded-xl shadow-md shadow-primary/20 transition-all text-sm group">
+                    <i data-lucide="shopping-bag" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                    Mulai Belanja Online
                 </a>
-                <a href="<?= base_url('catalog') ?>"
-                   class="inline-flex items-center gap-2 border border-gray-300 text-gray-700 font-semibold px-6 py-3 rounded-xl hover:border-primary hover:text-primary transition-colors text-sm">
-                    Lihat Katalog
+                <a href="#keunggulan"
+                   class="inline-flex items-center gap-2 border border-gray-200 bg-white hover:bg-cream/40 text-gray-700 font-semibold px-5 py-3.5 rounded-xl hover:border-primary/50 transition-colors text-sm">
+                    <i data-lucide="store" class="w-4 h-4 text-primary"></i>
+                    Keunggulan Toko
                 </a>
+            </div>
+
+            <!-- Trust Badges (Tahap GET) -->
+            <div class="pt-6 border-t border-gray-100 grid grid-cols-3 gap-2 sm:gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-50 border border-green-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-gray-800">100% Original</div>
+                        <div class="text-[11px] text-gray-400">Produk Resmi</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="store" class="w-4 h-4 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-gray-800">Online & Offline</div>
+                        <div class="text-[11px] text-gray-400">Fleksibel Beli</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="gift" class="w-4 h-4 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-gray-800">Promo Bulanan</div>
+                        <div class="text-[11px] text-gray-400">Reward Perilaku</div>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- Hallmark · component: hero-product-slideshow · genre: playful · tone: soft
@@ -171,6 +210,51 @@
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Banner Promo Perilaku Bulanan (Behavioral Promo - Tahap GET) -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+    <div class="bg-gradient-to-r from-primary-dark via-primary to-secondary text-white rounded-3xl p-6 sm:p-8 shadow-lg relative overflow-hidden">
+        <!-- Background decorative circles -->
+        <div class="absolute -right-12 -top-12 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+        <div class="absolute right-1/3 -bottom-16 w-48 h-48 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="max-w-xl">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold uppercase tracking-wider mb-3 backdrop-blur-xs">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    Promo Perilaku Bulanan
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-playfair font-bold leading-tight mb-2">
+                    Makin Banyak Beli Produk Bulan Ini, Makin Banyak Untungnya!
+                </h2>
+                <p class="text-white/90 text-xs sm:text-sm leading-relaxed">
+                    Setiap pembelian produk dihitung otomatis setiap bulannya. Raih diskon langsung hingga 15% dan bonus poin loyalitas setiap kali checkout!
+                </p>
+            </div>
+
+            <!-- 3 Tier Mini Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto shrink-0">
+                <div class="bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/20 text-center">
+                    <div class="text-xs font-bold text-amber-200 uppercase tracking-wider mb-0.5">3+ Produk / Bln</div>
+                    <div class="text-lg font-black text-white">Diskon 5%</div>
+                    <div class="text-[11px] text-white/80 mt-1">Tier Smart Buyer</div>
+                </div>
+
+                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-3.5 border border-white/30 text-center shadow-md scale-105">
+                    <div class="text-xs font-bold text-amber-300 uppercase tracking-wider mb-0.5">5+ Produk / Bln</div>
+                    <div class="text-lg font-black text-white">Diskon 10%</div>
+                    <div class="text-[11px] text-white/90 mt-1">Tier Loyal Shopper</div>
+                </div>
+
+                <div class="bg-white/15 backdrop-blur-md rounded-2xl p-3.5 border border-white/20 text-center">
+                    <div class="text-xs font-bold text-amber-200 uppercase tracking-wider mb-0.5">10+ Produk / Bln</div>
+                    <div class="text-lg font-black text-white">Diskon 15%</div>
+                    <div class="text-[11px] text-white/80 mt-1">+100 Bonus Poin</div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -393,6 +477,65 @@
     </div>
 </section>
 <?php endif; ?>
+
+<!-- Keunggulan Toko (Tahap GET: Menarik Pelanggan Baru & Membedakan Online vs Offline) -->
+<section id="keunggulan" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 mb-8">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="text-xs font-semibold text-primary uppercase tracking-widest block mb-2">Kenapa Nurfa Beauty?</span>
+        <h2 class="text-2xl sm:text-3xl font-playfair font-bold text-gray-800">
+            Kenyamanan Belanja Online &amp; Kehangatan Toko Offline
+        </h2>
+        <p class="text-gray-500 text-sm mt-2">
+            Kami hadir memberikan solusi perawatan terbaik yang fleksibel sesuai kenyamanan Anda.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- 1: Beli Online Praktis -->
+        <div class="bg-white p-6 rounded-2xl border border-primary-light/40 shadow-xs hover:shadow-md hover:border-primary transition-all">
+            <div class="w-12 h-12 rounded-xl bg-primary-light/40 text-primary-dark flex items-center justify-center mb-4">
+                <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-base mb-2">Belanja Online Praktis</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">
+                Pilih produk kapan saja dari rumah, bayar dengan transfer bank mudah, pesanan dikirim cepat dan aman sampai ke tempat Anda.
+            </p>
+        </div>
+
+        <!-- 2: Toko Offline Ramah -->
+        <div class="bg-white p-6 rounded-2xl border border-primary-light/40 shadow-xs hover:shadow-md hover:border-primary transition-all">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                <i data-lucide="store" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-base mb-2">Toko Offline Ramah</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">
+                Ingin melihat langsung produk dan konsultasi? Silakan mampir ke toko fisik kami, staf kami siap menyambut dengan ramah.
+            </p>
+        </div>
+
+        <!-- 3: Promo Perilaku Bulanan -->
+        <div class="bg-white p-6 rounded-2xl border border-primary-light/40 shadow-xs hover:shadow-md hover:border-primary transition-all">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+                <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-base mb-2">Reward Belanja Bulanan</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">
+                Makin banyak produk dibeli per bulan, makin tinggi diskon otomatis (hingga 15%) dan bonus poin loyalitas yang Anda nikmati.
+            </p>
+        </div>
+
+        <!-- 4: Jaminan 100% Original -->
+        <div class="bg-white p-6 rounded-2xl border border-primary-light/40 shadow-xs hover:shadow-md hover:border-primary transition-all">
+            <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center mb-4">
+                <i data-lucide="check-check" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-base mb-2">100% Produk Asli</h3>
+            <p class="text-gray-500 text-xs leading-relaxed">
+                Semua produk skincare &amp; kosmetik kami terjamin keasliannya dan aman digunakan untuk kesehatan kulit Anda.
+            </p>
+        </div>
+    </div>
+</section>
 
 <!-- CTA Band: full-bleed solid primary -->
 <section class="bg-primary py-12 sm:py-16">

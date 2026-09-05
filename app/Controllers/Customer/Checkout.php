@@ -117,38 +117,69 @@ class Checkout extends BaseController
             $voucher     = $firstPurchaseVoucher;
         }
 
+        // Cek promo perilaku bulanan (Behavioral Reward)
+        helper('loyalty');
+        $db = \Config\Database::connect();
+        $monthlyRow = $db->table('transaction_items')
+            ->join('transactions', 'transactions.id = transaction_items.transaction_id')
+            ->where('transactions.customer_id', $customerId)
+            ->whereIn('transactions.status', ['completed', 'paid'])
+            ->where('MONTH(transactions.transaction_date)', (int) date('m'))
+            ->where('YEAR(transactions.transaction_date)', (int) date('Y'))
+            ->selectSum('transaction_items.quantity', 'total_qty')
+            ->get()
+            ->getRow();
+        $monthlyProductCount = (int) ($monthlyRow->total_qty ?? 0);
+        $behaviorReward = get_monthly_behavior_reward($monthlyProductCount);
+
         // Manual voucher code apply
         $appliedVoucher = null;
         if ($voucherCodeInput && !$firstPurchaseVoucher) {
-            $appliedVoucher = $this->voucherModel
-                ->join('promotions', 'promotions.id = vouchers.promotion_id')
-                ->where('vouchers.code', $voucherCodeInput)
-                ->where('vouchers.is_used', 0)
-                ->where('vouchers.expires_at >', date('Y-m-d H:i:s'))
-                ->where('promotions.is_active', 1)
-                ->where('promotions.start_date <=', date('Y-m-d'))
-                ->where('promotions.end_date >=', date('Y-m-d'))
-                ->first();
-
-            if ($appliedVoucher) {
-                // Check if customer-specific voucher belongs to this customer
-                if ($appliedVoucher['customer_id'] && $appliedVoucher['customer_id'] != $customerId) {
-                    $appliedVoucher = null;
-                }
-                // Check min purchase
-                if ($appliedVoucher && $appliedVoucher['min_purchase'] > 0 && $totalAmount < $appliedVoucher['min_purchase']) {
-                    $appliedVoucher = null;
-                }
-            }
-
-            if ($appliedVoucher) {
-                if ($appliedVoucher['discount_type'] === 'percentage') {
-                    $discountAmount = $totalAmount * $appliedVoucher['discount_value'] / 100;
-                } else {
-                    $discountAmount = min($appliedVoucher['discount_value'], $totalAmount);
-                }
-                $voucherCode = $appliedVoucher['code'];
+            if ($voucherCodeInput === 'BEHAVIOR_REWARD' && $behaviorReward['is_qualified']) {
+                $pct = $behaviorReward['active_reward']['discount_pct'];
+                $maxDisc = $behaviorReward['active_reward']['max_discount'];
+                $discountAmount = min(($totalAmount * $pct) / 100, $maxDisc);
+                $discountAmount = min($discountAmount, $totalAmount);
+                $voucherCode = 'BEHAVIOR_REWARD';
+                $appliedVoucher = [
+                    'code'           => 'BEHAVIOR_REWARD',
+                    'promotion_name' => $behaviorReward['active_reward']['title'] . ' (' . $behaviorReward['active_reward']['badge'] . ')',
+                    'discount_type'  => 'percentage',
+                    'discount_value' => $pct,
+                    'is_behavior'    => true,
+                ];
                 $voucher = $appliedVoucher;
+            } else {
+                $appliedVoucher = $this->voucherModel
+                    ->join('promotions', 'promotions.id = vouchers.promotion_id')
+                    ->where('vouchers.code', $voucherCodeInput)
+                    ->where('vouchers.is_used', 0)
+                    ->where('vouchers.expires_at >', date('Y-m-d H:i:s'))
+                    ->where('promotions.is_active', 1)
+                    ->where('promotions.start_date <=', date('Y-m-d'))
+                    ->where('promotions.end_date >=', date('Y-m-d'))
+                    ->first();
+
+                if ($appliedVoucher) {
+                    // Check if customer-specific voucher belongs to this customer
+                    if ($appliedVoucher['customer_id'] && $appliedVoucher['customer_id'] != $customerId) {
+                        $appliedVoucher = null;
+                    }
+                    // Check min purchase
+                    if ($appliedVoucher && $appliedVoucher['min_purchase'] > 0 && $totalAmount < $appliedVoucher['min_purchase']) {
+                        $appliedVoucher = null;
+                    }
+                }
+
+                if ($appliedVoucher) {
+                    if ($appliedVoucher['discount_type'] === 'percentage') {
+                        $discountAmount = $totalAmount * $appliedVoucher['discount_value'] / 100;
+                    } else {
+                        $discountAmount = min($appliedVoucher['discount_value'], $totalAmount);
+                    }
+                    $voucherCode = $appliedVoucher['code'];
+                    $voucher = $appliedVoucher;
+                }
             }
         }
 
@@ -212,6 +243,8 @@ class Checkout extends BaseController
             'crossSellProducts'   => $crossSellProducts ?? [],
             'appliedVoucher'      => $appliedVoucher ?? null,
             'voucherCodeInput'    => $voucherCodeInput ?? null,
+            'monthlyProductCount' => $monthlyProductCount ?? 0,
+            'behaviorReward'      => $behaviorReward ?? null,
         ];
 
         return view('customer/checkout/index', $data);
@@ -304,35 +337,58 @@ class Checkout extends BaseController
             }
         }
 
-        // Manual voucher code apply
+        // Manual voucher code apply or Behavior Reward apply
         $appliedVoucher = null;
         if ($voucherCodeInput && !$firstPurchaseVoucher) {
-            $appliedVoucher = $this->voucherModel
-                ->join('promotions', 'promotions.id = vouchers.promotion_id')
-                ->where('vouchers.code', $voucherCodeInput)
-                ->where('vouchers.is_used', 0)
-                ->where('vouchers.expires_at >', date('Y-m-d H:i:s'))
-                ->where('promotions.is_active', 1)
-                ->where('promotions.start_date <=', date('Y-m-d'))
-                ->where('promotions.end_date >=', date('Y-m-d'))
-                ->first();
+            if ($voucherCodeInput === 'BEHAVIOR_REWARD') {
+                helper('loyalty');
+                $db = \Config\Database::connect();
+                $monthlyRow = $db->table('transaction_items')
+                    ->join('transactions', 'transactions.id = transaction_items.transaction_id')
+                    ->where('transactions.customer_id', $customerId)
+                    ->whereIn('transactions.status', ['completed', 'paid'])
+                    ->where('MONTH(transactions.transaction_date)', (int) date('m'))
+                    ->where('YEAR(transactions.transaction_date)', (int) date('Y'))
+                    ->selectSum('transaction_items.quantity', 'total_qty')
+                    ->get()
+                    ->getRow();
+                $monthlyProductCount = (int) ($monthlyRow->total_qty ?? 0);
+                $bReward = get_monthly_behavior_reward($monthlyProductCount);
 
-            if ($appliedVoucher) {
-                // Check if customer-specific voucher belongs to this customer
-                if ($appliedVoucher['customer_id'] && $appliedVoucher['customer_id'] != $customerId) {
-                    $appliedVoucher = null;
+                if ($bReward['is_qualified']) {
+                    $pct = $bReward['active_reward']['discount_pct'];
+                    $maxDisc = $bReward['active_reward']['max_discount'];
+                    $discountAmount = min(($totalAmount * $pct) / 100, $maxDisc);
+                    $discountAmount = min($discountAmount, $totalAmount);
                 }
-                // Check min purchase
-                if ($appliedVoucher && $appliedVoucher['min_purchase'] > 0 && $totalAmount < $appliedVoucher['min_purchase']) {
-                    $appliedVoucher = null;
-                }
-            }
+            } else {
+                $appliedVoucher = $this->voucherModel
+                    ->join('promotions', 'promotions.id = vouchers.promotion_id')
+                    ->where('vouchers.code', $voucherCodeInput)
+                    ->where('vouchers.is_used', 0)
+                    ->where('vouchers.expires_at >', date('Y-m-d H:i:s'))
+                    ->where('promotions.is_active', 1)
+                    ->where('promotions.start_date <=', date('Y-m-d'))
+                    ->where('promotions.end_date >=', date('Y-m-d'))
+                    ->first();
 
-            if ($appliedVoucher) {
-                if ($appliedVoucher['discount_type'] === 'percentage') {
-                    $discountAmount = $totalAmount * $appliedVoucher['discount_value'] / 100;
-                } else {
-                    $discountAmount = min($appliedVoucher['discount_value'], $totalAmount);
+                if ($appliedVoucher) {
+                    // Check if customer-specific voucher belongs to this customer
+                    if ($appliedVoucher['customer_id'] && $appliedVoucher['customer_id'] != $customerId) {
+                        $appliedVoucher = null;
+                    }
+                    // Check min purchase
+                    if ($appliedVoucher && $appliedVoucher['min_purchase'] > 0 && $totalAmount < $appliedVoucher['min_purchase']) {
+                        $appliedVoucher = null;
+                    }
+                }
+
+                if ($appliedVoucher) {
+                    if ($appliedVoucher['discount_type'] === 'percentage') {
+                        $discountAmount = $totalAmount * $appliedVoucher['discount_value'] / 100;
+                    } else {
+                        $discountAmount = min($appliedVoucher['discount_value'], $totalAmount);
+                    }
                 }
             }
         }

@@ -69,18 +69,26 @@ class Report extends BaseController
         /** @var string $period */
         $period = $this->request->getGet('period') ?? 'daily';
 
-        // Summary stats
+        // Summary stats (Total, Online vs Offline)
         $summary = $this->db->table('transactions')
             ->select('COUNT(*) as total_transactions, COALESCE(SUM(final_amount), 0) as total_revenue, COALESCE(AVG(final_amount), 0) as avg_transaction')
+            ->select("COUNT(CASE WHEN payment_method != 'offline' THEN 1 END) as online_transactions")
+            ->select("COALESCE(SUM(CASE WHEN payment_method != 'offline' THEN final_amount ELSE 0 END), 0) as online_revenue")
+            ->select("COUNT(CASE WHEN payment_method = 'offline' THEN 1 END) as offline_transactions")
+            ->select("COALESCE(SUM(CASE WHEN payment_method = 'offline' THEN final_amount ELSE 0 END), 0) as offline_revenue")
             ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->get()
             ->getRowArray();
 
-        $totalRevenue      = (int) ($summary['total_revenue'] ?? 0);
-        $totalTransactions = (int) ($summary['total_transactions'] ?? 0);
-        $avgTransaction    = (int) ($summary['avg_transaction'] ?? 0);
+        $totalRevenue        = (int) ($summary['total_revenue'] ?? 0);
+        $totalTransactions   = (int) ($summary['total_transactions'] ?? 0);
+        $avgTransaction      = (int) ($summary['avg_transaction'] ?? 0);
+        $onlineRevenue       = (int) ($summary['online_revenue'] ?? 0);
+        $onlineTransactions  = (int) ($summary['online_transactions'] ?? 0);
+        $offlineRevenue      = (int) ($summary['offline_revenue'] ?? 0);
+        $offlineTransactions = (int) ($summary['offline_transactions'] ?? 0);
 
         // Breakdown by period
         $selectExpr = '';
@@ -106,11 +114,28 @@ class Report extends BaseController
             ->select('COUNT(*) as transaction_count')
             ->select('COALESCE(SUM(final_amount), 0) as period_revenue')
             ->select('COALESCE(AVG(final_amount), 0) as period_avg')
+            ->select("COUNT(CASE WHEN payment_method != 'offline' THEN 1 END) as online_count")
+            ->select("COALESCE(SUM(CASE WHEN payment_method != 'offline' THEN final_amount ELSE 0 END), 0) as online_revenue")
+            ->select("COUNT(CASE WHEN payment_method = 'offline' THEN 1 END) as offline_count")
+            ->select("COALESCE(SUM(CASE WHEN payment_method = 'offline' THEN final_amount ELSE 0 END), 0) as offline_revenue")
             ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
             ->groupBy('period_key')
             ->orderBy('period_key', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        // Ambil daftar transaksi detail dengan penanda channel (Beli Online vs Beli Offline)
+        $recentTransactions = $this->db->table('transactions')
+            ->select('transactions.*, customers.user_id, users.name as customer_name')
+            ->join('customers', 'customers.id = transactions.customer_id', 'left')
+            ->join('users', 'users.id = customers.user_id', 'left')
+            ->whereIn('transactions.status', ['completed', 'paid'])
+            ->where('transactions.transaction_date >=', $startDate . ' 00:00:00')
+            ->where('transactions.transaction_date <=', $endDate . ' 23:59:59')
+            ->orderBy('transactions.transaction_date', 'DESC')
+            ->limit(100)
             ->get()
             ->getResultArray();
 
@@ -145,18 +170,23 @@ class Report extends BaseController
             ->getResultArray();
 
         $data = [
-            'pageTitle'       => 'Laporan Penjualan',
-            'startDate'       => $startDate,
-            'endDate'         => $endDate,
-            'period'          => $period,
-            'totalRevenue'    => $totalRevenue,
-            'totalTransactions' => $totalTransactions,
-            'avgTransaction'  => $avgTransaction,
-            'breakdown'       => $breakdown ?? [],
-            'chartLabels'     => $chartLabels,
-            'chartRevenue'    => $chartRevenue,
-            'chartCounts'     => $chartCounts,
-            'topProducts'     => $topProducts ?? [],
+            'pageTitle'           => 'Laporan Penjualan',
+            'startDate'           => $startDate,
+            'endDate'             => $endDate,
+            'period'              => $period,
+            'totalRevenue'        => $totalRevenue,
+            'totalTransactions'   => $totalTransactions,
+            'avgTransaction'      => $avgTransaction,
+            'onlineRevenue'       => $onlineRevenue,
+            'onlineTransactions'  => $onlineTransactions,
+            'offlineRevenue'      => $offlineRevenue,
+            'offlineTransactions' => $offlineTransactions,
+            'recentTransactions'  => $recentTransactions ?? [],
+            'breakdown'           => $breakdown ?? [],
+            'chartLabels'         => $chartLabels,
+            'chartRevenue'        => $chartRevenue,
+            'chartCounts'         => $chartCounts,
+            'topProducts'         => $topProducts ?? [],
         ];
 
         return view('admin/report/sales', $data);
@@ -392,6 +422,10 @@ class Report extends BaseController
 
         $summary = $this->db->table('transactions')
             ->select('COUNT(*) as total_transactions, COALESCE(SUM(final_amount), 0) as total_revenue, COALESCE(AVG(final_amount), 0) as avg_transaction')
+            ->select("COUNT(CASE WHEN payment_method != 'offline' THEN 1 END) as online_transactions")
+            ->select("COALESCE(SUM(CASE WHEN payment_method != 'offline' THEN final_amount ELSE 0 END), 0) as online_revenue")
+            ->select("COUNT(CASE WHEN payment_method = 'offline' THEN 1 END) as offline_transactions")
+            ->select("COALESCE(SUM(CASE WHEN payment_method = 'offline' THEN final_amount ELSE 0 END), 0) as offline_revenue")
             ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
@@ -402,6 +436,10 @@ class Report extends BaseController
             ->select("DATE(transaction_date) as period_label")
             ->select('COUNT(*) as transaction_count')
             ->select('COALESCE(SUM(final_amount), 0) as period_revenue')
+            ->select("COUNT(CASE WHEN payment_method != 'offline' THEN 1 END) as online_count")
+            ->select("COALESCE(SUM(CASE WHEN payment_method != 'offline' THEN final_amount ELSE 0 END), 0) as online_revenue")
+            ->select("COUNT(CASE WHEN payment_method = 'offline' THEN 1 END) as offline_count")
+            ->select("COALESCE(SUM(CASE WHEN payment_method = 'offline' THEN final_amount ELSE 0 END), 0) as offline_revenue")
             ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
@@ -426,24 +464,28 @@ class Report extends BaseController
             ->getResultArray();
 
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f3f4f6;font-weight:600}.summary td{font-size:14px;padding:8px 12px}h2{color:#E8A0BF}h3{margin-top:20px}</style>';
+        $html .= '<style>body{font-family:sans-serif;font-size:11px}table{width:100%;border-collapse:collapse;margin-bottom:18px}th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}th{background:#f3f4f6;font-weight:600}.summary td{font-size:12px;padding:6px 10px}h2{color:#E8A0BF;margin-bottom:4px}h3{margin-top:14px;margin-bottom:6px}.badge-online{color:#15803d;font-weight:bold}.badge-offline{color:#c2410c;font-weight:bold}</style>';
         $html .= '</head><body>';
         $html .= '<h2>Laporan Penjualan Nurfa Beauty</h2>';
         $html .= '<p>Periode: ' . date('d M Y', strtotime($startDate)) . ' - ' . date('d M Y', strtotime($endDate)) . '</p>';
 
-        $html .= '<h3>Ringkasan</h3><table class="summary">';
+        $html .= '<h3>Ringkasan Penjualan</h3><table class="summary">';
         $html .= '<tr><td>Total Pendapatan</td><td><strong>Rp ' . number_format((int) ($summary['total_revenue'] ?? 0), 0, ',', '.') . '</strong></td></tr>';
-        $html .= '<tr><td>Total Transaksi</td><td><strong>' . (int) ($summary['total_transactions'] ?? 0) . '</strong></td></tr>';
+        $html .= '<tr><td>Total Transaksi</td><td><strong>' . (int) ($summary['total_transactions'] ?? 0) . ' transaksi</strong></td></tr>';
+        $html .= '<tr><td>Beli Online</td><td><span class="badge-online">' . (int) ($summary['online_transactions'] ?? 0) . ' transaksi (Rp ' . number_format((int) ($summary['online_revenue'] ?? 0), 0, ',', '.') . ')</span></td></tr>';
+        $html .= '<tr><td>Beli Offline (Toko)</td><td><span class="badge-offline">' . (int) ($summary['offline_transactions'] ?? 0) . ' transaksi (Rp ' . number_format((int) ($summary['offline_revenue'] ?? 0), 0, ',', '.') . ')</span></td></tr>';
         $html .= '<tr><td>Rata-rata per Transaksi</td><td><strong>Rp ' . number_format((int) ($summary['avg_transaction'] ?? 0), 0, ',', '.') . '</strong></td></tr>';
         $html .= '</table>';
 
-        $html .= '<h3>Breakdown Harian</h3><table>';
-        $html .= '<tr><th>Tanggal</th><th>Jumlah Transaksi</th><th>Pendapatan</th></tr>';
+        $html .= '<h3>Breakdown Harian (Beli Online vs Offline)</h3><table>';
+        $html .= '<tr><th>Tanggal</th><th>Total Trx</th><th>Beli Online</th><th>Beli Offline</th><th>Total Pendapatan</th></tr>';
         foreach ($breakdown as $row) {
             $html .= '<tr>';
             $html .= '<td>' . date('d M Y', strtotime($row['period_label'] ?? '')) . '</td>';
             $html .= '<td>' . (int) ($row['transaction_count'] ?? 0) . '</td>';
-            $html .= '<td>Rp ' . number_format((int) ($row['period_revenue'] ?? 0), 0, ',', '.') . '</td>';
+            $html .= '<td><span class="badge-online">' . (int) ($row['online_count'] ?? 0) . ' trx</span> (Rp ' . number_format((int) ($row['online_revenue'] ?? 0), 0, ',', '.') . ')</td>';
+            $html .= '<td><span class="badge-offline">' . (int) ($row['offline_count'] ?? 0) . ' trx</span> (Rp ' . number_format((int) ($row['offline_revenue'] ?? 0), 0, ',', '.') . ')</td>';
+            $html .= '<td><strong>Rp ' . number_format((int) ($row['period_revenue'] ?? 0), 0, ',', '.') . '</strong></td>';
             $html .= '</tr>';
         }
         $html .= '</table>';
@@ -490,6 +532,10 @@ class Report extends BaseController
 
         $summary = $this->db->table('transactions')
             ->select('COUNT(*) as total_transactions, COALESCE(SUM(final_amount), 0) as total_revenue, COALESCE(AVG(final_amount), 0) as avg_transaction')
+            ->select("COUNT(CASE WHEN payment_method != 'offline' THEN 1 END) as online_transactions")
+            ->select("COALESCE(SUM(CASE WHEN payment_method != 'offline' THEN final_amount ELSE 0 END), 0) as online_revenue")
+            ->select("COUNT(CASE WHEN payment_method = 'offline' THEN 1 END) as offline_transactions")
+            ->select("COALESCE(SUM(CASE WHEN payment_method = 'offline' THEN final_amount ELSE 0 END), 0) as offline_revenue")
             ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
@@ -500,6 +546,10 @@ class Report extends BaseController
             ->select("DATE(transaction_date) as period_label")
             ->select('COUNT(*) as transaction_count')
             ->select('COALESCE(SUM(final_amount), 0) as period_revenue')
+            ->select("COUNT(CASE WHEN payment_method != 'offline' THEN 1 END) as online_count")
+            ->select("COALESCE(SUM(CASE WHEN payment_method != 'offline' THEN final_amount ELSE 0 END), 0) as online_revenue")
+            ->select("COUNT(CASE WHEN payment_method = 'offline' THEN 1 END) as offline_count")
+            ->select("COALESCE(SUM(CASE WHEN payment_method = 'offline' THEN final_amount ELSE 0 END), 0) as offline_revenue")
             ->whereIn('status', ['completed', 'paid'])
             ->where('transaction_date >=', $startDate . ' 00:00:00')
             ->where('transaction_date <=', $endDate . ' 23:59:59')
@@ -521,25 +571,41 @@ class Report extends BaseController
         $sheet->setCellValue('B4', (int) ($summary['total_revenue'] ?? 0));
         $sheet->setCellValue('A5', 'Total Transaksi');
         $sheet->setCellValue('B5', (int) ($summary['total_transactions'] ?? 0));
-        $sheet->setCellValue('A6', 'Rata-rata per Transaksi');
-        $sheet->setCellValue('B6', (int) ($summary['avg_transaction'] ?? 0));
-        $sheet->getStyle('B4:B6')->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->setCellValue('A6', 'Transaksi Online');
+        $sheet->setCellValue('B6', (int) ($summary['online_transactions'] ?? 0));
+        $sheet->setCellValue('C6', 'Rp ' . number_format((int) ($summary['online_revenue'] ?? 0)));
+        $sheet->setCellValue('A7', 'Transaksi Offline');
+        $sheet->setCellValue('B7', (int) ($summary['offline_transactions'] ?? 0));
+        $sheet->setCellValue('C7', 'Rp ' . number_format((int) ($summary['offline_revenue'] ?? 0)));
+        $sheet->setCellValue('A8', 'Rata-rata per Transaksi');
+        $sheet->setCellValue('B8', (int) ($summary['avg_transaction'] ?? 0));
+        $sheet->getStyle('B4:B8')->getNumberFormat()->setFormatCode('#,##0');
 
         // Breakdown header
-        $sheet->setCellValue('A8', 'Tanggal');
-        $sheet->setCellValue('B8', 'Jumlah Transaksi');
-        $sheet->setCellValue('C8', 'Pendapatan');
-        $sheet->getStyle('A8:C8')->getFont()->setBold(true);
+        $sheet->setCellValue('A10', 'Tanggal');
+        $sheet->setCellValue('B10', 'Total Trx');
+        $sheet->setCellValue('C10', 'Trx Online');
+        $sheet->setCellValue('D10', 'Omset Online');
+        $sheet->setCellValue('E10', 'Trx Offline');
+        $sheet->setCellValue('F10', 'Omset Offline');
+        $sheet->setCellValue('G10', 'Total Pendapatan');
+        $sheet->getStyle('A10:G10')->getFont()->setBold(true);
 
-        $row = 9;
+        $row = 11;
         foreach ($breakdown as $data) {
             $sheet->setCellValue('A' . $row, $data['period_label'] ?? '');
             $sheet->setCellValue('B' . $row, (int) ($data['transaction_count'] ?? 0));
-            $sheet->setCellValue('C' . $row, (int) ($data['period_revenue'] ?? 0));
+            $sheet->setCellValue('C' . $row, (int) ($data['online_count'] ?? 0));
+            $sheet->setCellValue('D' . $row, (int) ($data['online_revenue'] ?? 0));
+            $sheet->setCellValue('E' . $row, (int) ($data['offline_count'] ?? 0));
+            $sheet->setCellValue('F' . $row, (int) ($data['offline_revenue'] ?? 0));
+            $sheet->setCellValue('G' . $row, (int) ($data['period_revenue'] ?? 0));
             $row++;
         }
         if (!empty($breakdown)) {
-            $sheet->getStyle('C9:C' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('D11:D' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('F11:F' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle('G11:G' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
         }
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);

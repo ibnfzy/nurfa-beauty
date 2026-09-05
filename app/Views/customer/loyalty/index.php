@@ -9,6 +9,8 @@
 /** @var array $pointHistory */
 /** @var \CodeIgniter\Pager\Pager|null $pager */
 /** @var array $vouchers */
+/** @var int $monthlyProductCount */
+/** @var array $monthlyBehaviorReward */
 ?>
 
 <?= $this->section('content') ?>
@@ -78,6 +80,125 @@
             </p>
         </div>
     <?php endif; ?>
+
+    <!-- Behavioral Promo Section: Promo Berdasarkan Perilaku Belanja Bulanan -->
+    <div class="bg-white rounded-2xl shadow-sm border border-primary-light/40 p-6 sm:p-7 mb-8 overflow-hidden relative">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary-light text-primary-dark mb-2">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Promo Perilaku Pelanggan (Bulanan)
+                </div>
+                <h2 class="text-xl font-bold text-gray-900">Promo Kuantitas Produk Bulan Ini</h2>
+                <p class="text-sm text-gray-500 mt-1">
+                    Semakin banyak produk yang Anda beli dalam sebulan, semakin tinggi reward &amp; diskon belanja yang Anda dapatkan!
+                </p>
+            </div>
+            <div class="bg-gradient-to-br from-pink-50 to-primary-light/30 border border-primary/20 rounded-xl p-4 text-center min-w-[200px]">
+                <p class="text-xs text-gray-500 uppercase font-semibold">Produk Dibeli Bulan Ini</p>
+                <div class="flex items-baseline justify-center gap-1 mt-1">
+                    <span class="text-3xl font-extrabold text-primary"><?= (int) $monthlyProductCount ?></span>
+                    <span class="text-sm text-gray-600 font-medium">produk</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Periode: <?= date('M Y') ?></p>
+            </div>
+        </div>
+
+        <!-- Status Reward & Progress -->
+        <div class="mt-6">
+            <?php if (!empty($monthlyBehaviorReward['active_reward'])): ?>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-green-500 text-white flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="award" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-green-900"><?= esc($monthlyBehaviorReward['active_reward']['title']) ?> Tercapai!</span>
+                                <span class="bg-green-200 text-green-800 text-xs px-2 py-0.5 rounded-full font-semibold">Aktif</span>
+                            </div>
+                            <p class="text-xs text-green-700 mt-0.5">
+                                <?= esc($monthlyBehaviorReward['active_reward']['description']) ?>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-green-600 text-white rounded-lg">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i> Siap Pakai di Checkout
+                        </span>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($monthlyBehaviorReward['next_target'])): ?>
+                <div class="bg-cream/40 rounded-xl p-4 border border-gray-100 mb-6">
+                    <div class="flex items-center justify-between text-xs sm:text-sm mb-2 font-medium text-gray-700">
+                        <span>Target Berikutnya: <strong class="text-primary"><?= esc($monthlyBehaviorReward['next_target']['title']) ?></strong> (<?= $monthlyBehaviorReward['next_target']['target'] ?> Produk)</span>
+                        <span class="text-primary font-bold"><?= $monthlyBehaviorReward['next_target']['progress'] ?>%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                        <div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full transition-all duration-500" style="width: <?= min($monthlyBehaviorReward['next_target']['progress'], 100) ?>%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">
+                        Beli <strong class="text-primary"><?= $monthlyBehaviorReward['next_target']['remaining'] ?> produk lagi</strong> di bulan ini untuk mengklaim level reward berikutnya!
+                    </p>
+                </div>
+            <?php endif; ?>
+
+            <!-- Tier Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Tier 1: Smart Buyer -->
+                <div class="rounded-xl border p-4 transition-all <?= ($monthlyProductCount >= 3) ? 'border-primary bg-primary-light/10 shadow-sm' : 'border-gray-200 bg-white opacity-85' ?>">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase px-2 py-0.5 rounded <?= ($monthlyProductCount >= 3) ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600' ?>">
+                            3+ Produk / Bulan
+                        </span>
+                        <?php if ($monthlyProductCount >= 3): ?>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-success"></i>
+                        <?php else: ?>
+                            <i data-lucide="lock" class="w-4 h-4 text-gray-400"></i>
+                        <?php endif; ?>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm">Smart Buyer Reward</h3>
+                    <p class="text-xs text-primary font-bold mt-1">Diskon 5% (Maks Rp 10.000)</p>
+                    <p class="text-xs text-gray-500 mt-1">+ Bonus 20 Poin Loyalitas</p>
+                </div>
+
+                <!-- Tier 2: Loyal Shopper -->
+                <div class="rounded-xl border p-4 transition-all <?= ($monthlyProductCount >= 5) ? 'border-primary bg-primary-light/10 shadow-sm' : 'border-gray-200 bg-white opacity-85' ?>">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase px-2 py-0.5 rounded <?= ($monthlyProductCount >= 5) ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600' ?>">
+                            5+ Produk / Bulan
+                        </span>
+                        <?php if ($monthlyProductCount >= 5): ?>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-success"></i>
+                        <?php else: ?>
+                            <i data-lucide="lock" class="w-4 h-4 text-gray-400"></i>
+                        <?php endif; ?>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm">Loyal Shopper Reward</h3>
+                    <p class="text-xs text-primary font-bold mt-1">Diskon 10% (Maks Rp 25.000)</p>
+                    <p class="text-xs text-gray-500 mt-1">+ Bonus 50 Poin Loyalitas</p>
+                </div>
+
+                <!-- Tier 3: Super Fan -->
+                <div class="rounded-xl border p-4 transition-all <?= ($monthlyProductCount >= 10) ? 'border-primary bg-primary-light/10 shadow-sm' : 'border-gray-200 bg-white opacity-85' ?>">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase px-2 py-0.5 rounded <?= ($monthlyProductCount >= 10) ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600' ?>">
+                            10+ Produk / Bulan
+                        </span>
+                        <?php if ($monthlyProductCount >= 10): ?>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-success"></i>
+                        <?php else: ?>
+                            <i data-lucide="lock" class="w-4 h-4 text-gray-400"></i>
+                        <?php endif; ?>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-sm">Super Fan Reward</h3>
+                    <p class="text-xs text-primary font-bold mt-1">Diskon 15% (Maks Rp 50.000)</p>
+                    <p class="text-xs text-gray-500 mt-1">+ Bonus 100 Poin Loyalitas</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Benefits Section -->
     <div class="mb-8">

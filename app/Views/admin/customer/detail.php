@@ -3,7 +3,9 @@
 /** @var string $pageTitle */
 /** @var array|null $customer */
 /** @var array $transactions */
-/** @var array $loyaltyLogs */
+/** @var array $pointsLog */
+/** @var int $monthlyProductCount */
+/** @var array $monthlyBehaviorReward */
 ?>
 
 <?= $this->section('content') ?>
@@ -65,10 +67,14 @@
         ];
 
         $levelColorClass = $badgeColorMap[$levelColor] ?? $badgeColorMap['gray'];
+
+        $actColor = $customer['activity_color'] ?? 'gray';
+        $actColorClass = $badgeColorMap[$actColor] ?? $badgeColorMap['gray'];
+        $actLabel = $customer['activity_label'] ?? 'Tidak Diketahui';
     ?>
 
     <!-- Cards Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
         <!-- Card 1: Profile Info -->
         <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
@@ -102,34 +108,78 @@
             </div>
         </div>
 
-        <!-- Card 2: Membership & Loyalty -->
+        <!-- Card 2: Membership & Activity (CRM GET) -->
         <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
                 <h3 class="font-semibold text-gray-800 flex items-center gap-2">
                     <i data-lucide="award" class="w-5 h-5 text-primary"></i>
-                    Keanggotaan & Loyalitas
+                    Status Keanggotaan & CRM
                 </h3>
             </div>
             <div class="px-6 py-4 space-y-4">
                 <div class="flex items-start gap-3">
-                    <span class="text-sm text-gray-500 w-36 shrink-0">Level</span>
+                    <span class="text-sm text-gray-500 w-32 shrink-0">Status CRM</span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold <?= $actColorClass ?>"><?= $actLabel ?></span>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-sm text-gray-500 w-32 shrink-0">Level Tier</span>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $levelColorClass ?>"><?= $levelLabel ?></span>
                 </div>
                 <div class="flex items-start gap-3">
-                    <span class="text-sm text-gray-500 w-36 shrink-0">Poin Loyalitas</span>
+                    <span class="text-sm text-gray-500 w-32 shrink-0">Poin Loyalitas</span>
                     <span class="text-sm font-medium text-gray-800"><?= number_format($customer['loyalty_points'] ?? 0, 0, ',', '.') ?> poin</span>
                 </div>
                 <div class="flex items-start gap-3">
-                    <span class="text-sm text-gray-500 w-36 shrink-0">Total Belanja</span>
+                    <span class="text-sm text-gray-500 w-32 shrink-0">Total Belanja</span>
                     <span class="text-sm font-medium text-gray-800">Rp <?= number_format($customer['total_spending'] ?? 0, 0, ',', '.') ?></span>
                 </div>
                 <div class="flex items-start gap-3">
-                    <span class="text-sm text-gray-500 w-36 shrink-0">Pertama Belanja</span>
-                    <span class="text-sm text-gray-800"><?= $customer['first_purchase_date'] ? date('d/m/Y', strtotime($customer['first_purchase_date'])) : '-' ?></span>
+                    <span class="text-sm text-gray-500 w-32 shrink-0">Terakhir Belanja</span>
+                    <span class="text-sm text-gray-800"><?= $customer['last_purchase_date'] ? date('d/m/Y', strtotime($customer['last_purchase_date'])) : '<span class="text-blue-600 font-medium">Belum pernah order</span>' ?></span>
                 </div>
-                <div class="flex items-start gap-3">
-                    <span class="text-sm text-gray-500 w-36 shrink-0">Terakhir Belanja</span>
-                    <span class="text-sm text-gray-800"><?= $customer['last_purchase_date'] ? date('d/m/Y', strtotime($customer['last_purchase_date'])) : '-' ?></span>
+            </div>
+        </div>
+
+        <!-- Card 3: Perilaku Belanja Bulan Ini (Behavioral Promo) -->
+        <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+                    Perilaku Belanja Bulan Ini
+                </h3>
+                <span class="text-xs font-medium text-gray-400"><?= date('F Y') ?></span>
+            </div>
+            <div class="px-6 py-4 space-y-4">
+                <div class="bg-amber-50/60 rounded-xl p-3 border border-amber-200/60">
+                    <div class="text-xs text-amber-800 font-medium mb-1">Produk Dibeli Bulan Ini:</div>
+                    <div class="text-2xl font-black text-amber-900"><?= $monthlyProductCount ?> <span class="text-sm font-normal text-amber-700">produk</span></div>
+                </div>
+
+                <div>
+                    <div class="text-xs text-gray-500 mb-1">Status Reward Perilaku:</div>
+                    <?php if (!empty($monthlyBehaviorReward['is_qualified'])): ?>
+                        <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-green-800">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                Memenuhi Tier <?= esc($monthlyBehaviorReward['active_reward']['tier_name'] ?? '') ?>
+                            </div>
+                            <p class="text-xs text-green-700 mt-1">
+                                Diskon <?= $monthlyBehaviorReward['active_reward']['discount_pct'] ?>% (maks Rp <?= number_format($monthlyBehaviorReward['active_reward']['max_discount'], 0, ',', '.') ?>) + Bonus <?= $monthlyBehaviorReward['active_reward']['bonus_points'] ?> Poin.
+                            </p>
+                        </div>
+                    <?php else: ?>
+                        <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div class="text-xs font-medium text-gray-700">Belum memenuhi tier reward</div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Butuh beli minimal <?= $monthlyBehaviorReward['next_tier']['products_needed'] ?? 3 ?> produk lagi bulan ini untuk klaim reward Smart Buyer.
+                            </p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="text-[11px] text-gray-400 bg-cream/40 p-2.5 rounded-lg border border-primary-light/20">
+                    <i data-lucide="info" class="w-3.5 h-3.5 inline text-primary-dark mr-1"></i>
+                    Promo dihitung otomatis dari riwayat transaksi yang selesai di bulan berjalan.
                 </div>
             </div>
         </div>
