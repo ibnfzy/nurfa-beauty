@@ -22,6 +22,7 @@ class ProductModel extends Model
         'is_bundle',
         'bundle_products',
         'bundle_discount',
+        'variants',
     ];
 
     // Join dengan categories

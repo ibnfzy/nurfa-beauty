@@ -79,7 +79,7 @@
                         </div>
 
                         <!-- Selected Address -->
-                        <template x-for="addr in <?= esc(json_encode($addresses ?? []), 'attr') ?>" :key="addr.id">
+                        <template x-for="addr in <?= json_encode($addresses ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>" :key="addr.id">
                             <div x-show="selectedAddressId == addr.id"
                                 class="border border-primary-light/50 rounded-lg p-4 bg-primary-light/10">
                                 <div class="flex items-start justify-between">

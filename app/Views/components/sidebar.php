@@ -1,3 +1,8 @@
+<?php
+// pendingPaymentCount passed from BaseController
+$pendingPaymentCount = $pendingPaymentCount ?? 0;
+?>
+
 <!-- Sidebar Admin -->
 <aside class="w-64 bg-white shadow-sm min-h-screen border-r border-gray-100" x-data="{ collapsed: false }">
     <!-- Logo -->
@@ -44,7 +49,12 @@
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
                   <?= strpos(uri_string(), 'admin/payments') === 0 ? 'bg-primary-light text-primary-dark' : 'text-gray-600 hover:bg-cream hover:text-primary' ?>">
             <i data-lucide="credit-card" class="w-5 h-5"></i>
-            Verifikasi Bayar
+            <span class="flex-1">Verifikasi Bayar</span>
+            <?php if ($pendingPaymentCount > 0): ?>
+                <span class="bg-danger text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
+                    <?= $pendingPaymentCount > 99 ? '99+' : $pendingPaymentCount ?>
+                </span>
+            <?php endif; ?>
         </a>
         <a href="<?= base_url('admin/promotions') ?>"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium

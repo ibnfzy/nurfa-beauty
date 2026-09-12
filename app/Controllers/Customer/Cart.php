@@ -57,8 +57,9 @@ class Cart extends BaseController
     public function add()
     {
         $rules = [
-            'product_id' => 'required|integer',
-            'quantity'   => 'required|integer|greater_than[0]',
+            'product_id'       => 'required|integer',
+            'quantity'         => 'required|integer|greater_than[0]',
+            'variant_selection' => 'permit_empty',
         ];
 
         $messages = [
@@ -79,15 +80,41 @@ class Cart extends BaseController
                 ->with('toast', ['type' => 'error', 'message' => 'Gagal menambahkan ke keranjang. Periksa kembali data Anda.']);
         }
 
-        $productId = $this->request->getPost('product_id');
-        $quantity  = (int) $this->request->getPost('quantity');
-        $customerId = $this->getCustomerId();
+        $productId     = $this->request->getPost('product_id');
+        $quantity      = (int) $this->request->getPost('quantity');
+        $variantSelection = $this->request->getPost('variant_selection') ?: null;
+        $customerId    = $this->getCustomerId();
 
         // Cek produk ada dan aktif
         $product = $this->productModel->where('is_active', 1)->find($productId);
         if (!$product) {
             return redirect()->back()
                 ->with('toast', ['type' => 'error', 'message' => 'Produk tidak ditemukan atau tidak aktif.']);
+        }
+
+        // Validasi varian jika produk punya varian
+        $variants = !empty($product['variants']) ? json_decode((string) $product['variants'], true) : null;
+        if (!empty($variants) && empty($variantSelection)) {
+            return redirect()->back()
+                ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih varian produk sebelum menambahkan ke keranjang.']);
+        }
+
+        // Validasi stok berdasarkan varian jika ada
+        if (!empty($variants) && !empty($variantSelection)) {
+            $selectedVariant = json_decode($variantSelection, true);
+            foreach ($selectedVariant as $key => $val) {
+                $found = false;
+                foreach ($variants as $variant) {
+                    if (isset($variant[$key]) && $variant[$key] == $val) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    return redirect()->back()
+                        ->with('toast', ['type' => 'error', 'message' => 'Varian yang dipilih tidak valid.']);
+                }
+            }
         }
 
         // Cek stok
@@ -106,13 +133,15 @@ class Cart extends BaseController
         // Jika sudah ada di keranjang, tambah quantity
         if ($existingCart) {
             $this->cartModel->update($existingCart['id'], [
-                'quantity' => $existingCart['quantity'] + $quantity,
+                'quantity'        => $existingCart['quantity'] + $quantity,
+                'variant_selection' => $variantSelection,
             ]);
         } else {
             $this->cartModel->save([
-                'customer_id' => $customerId,
-                'product_id'  => $productId,
-                'quantity'    => $quantity,
+                'customer_id'       => $customerId,
+                'product_id'        => $productId,
+                'quantity'          => $quantity,
+                'variant_selection' => $variantSelection,
             ]);
         }
 

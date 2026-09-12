@@ -15,6 +15,7 @@ class CartModel extends Model
         'customer_id',
         'product_id',
         'quantity',
+        'variant_selection',
     ];
 
     public function withProduct()

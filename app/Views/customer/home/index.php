@@ -54,6 +54,13 @@
     </div>
 </section>
 
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <p class="font-semibold mb-1">Informasi penting proses belanja</p>
+        <p>Setelah produk dimasukkan ke keranjang, segera lakukan checkout. Kami tidak menjamin stok produk yang hanya tersimpan di keranjang. Stok diberikan kepada pelanggan yang lebih dahulu menyelesaikan checkout.</p>
+    </div>
+</section>
+
 <!-- Products Section -->
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <?php if (!empty($search)): ?>

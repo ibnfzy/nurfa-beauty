@@ -18,10 +18,6 @@
                         <h1 class="text-lg font-semibold text-gray-800"><?= $pageTitle ?? 'Dashboard' ?></h1>
                     </div>
                     <div class="flex items-center gap-4">
-                        <button class="relative text-gray-500 hover:text-primary">
-                            <i data-lucide="bell" class="w-5 h-5"></i>
-                            <span class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
-                        </button>
                         <div class="flex items-center gap-2">
                             <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center">
                                 <i data-lucide="user" class="w-4 h-4 text-primary-dark"></i>

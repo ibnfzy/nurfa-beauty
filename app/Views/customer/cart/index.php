@@ -66,6 +66,16 @@
                                 <p class="text-primary font-bold text-sm mb-3">
                                     Rp <?= number_format($item['product_price'] ?? 0, 0, ',', '.') ?>
                                 </p>
+                                <?php $variantSelection = $item['variant_selection'] ?? null; ?>
+                                <?php if (!empty($variantSelection)): ?>
+                                    <?php $variantSelection = is_string($variantSelection) ? json_decode($variantSelection, true) : $variantSelection; ?>
+                                    <?php if (is_array($variantSelection)): ?>
+                                        <p class="text-xs text-gray-500 mb-3">
+                                            Varian:
+                                            <?= esc(implode(', ', array_map(static fn ($key, $value) => $key . ': ' . $value, array_keys($variantSelection), $variantSelection))) ?>
+                                        </p>
+                                    <?php endif; ?>
+                                <?php endif; ?>
 
                                 <!-- Stock Warning -->
                                 <?php if (($item['quantity'] ?? 0) > ($item['product_stock'] ?? 0)): ?>

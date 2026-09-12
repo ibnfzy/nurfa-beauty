@@ -27,4 +27,13 @@ class NotificationModel extends Model
         $this->select('notifications.*, users.name as customer_name, users.email as customer_email');
         return $this;
     }
+
+    /**
+     * Hitung notifikasi belum dibaca untuk customer
+     */
+    public function getUnreadCount(int $customerId): int
+    {
+        return $this->where(['customer_id' => $customerId, 'is_read' => 0])
+                    ->countAllResults();
+    }
 }

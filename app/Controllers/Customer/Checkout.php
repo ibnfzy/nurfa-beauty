@@ -86,6 +86,9 @@ class Checkout extends BaseController
             $defaultAddress = $addresses[0];
         }
 
+        // Ongkos kirim belum digunakan.
+        $shippingCost = 0;
+
         // Hitung total
         $totalAmount = 0;
         foreach ($cartItems as $item) {
@@ -183,7 +186,6 @@ class Checkout extends BaseController
             }
         }
 
-        $shippingCost = 15000;
         $finalAmount  = $totalAmount + $shippingCost - $discountAmount;
 
         // Ambil rekening bank aktif
@@ -308,9 +310,11 @@ class Checkout extends BaseController
             }
         }
 
+        // Hitung ongkos kirim (flat rate untuk sekarang)
+        $shippingCost = 0;
+
         // Hitung total
         $totalAmount   = 0;
-        $shippingCost  = 15000;
         $discountAmount = 0;
         $firstPurchaseVoucher = null;
 
@@ -574,4 +578,5 @@ class Checkout extends BaseController
         return redirect()->to('/transactions/' . $id)
             ->with('toast', ['type' => 'success', 'message' => 'Bukti transfer berhasil diupload! Menunggu verifikasi admin.']);
     }
+
 }

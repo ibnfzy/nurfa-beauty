@@ -464,9 +464,10 @@ class Report extends BaseController
             ->getResultArray();
 
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:11px}table{width:100%;border-collapse:collapse;margin-bottom:18px}th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}th{background:#f3f4f6;font-weight:600}.summary td{font-size:12px;padding:6px 10px}h2{color:#E8A0BF;margin-bottom:4px}h3{margin-top:14px;margin-bottom:6px}.badge-online{color:#15803d;font-weight:bold}.badge-offline{color:#c2410c;font-weight:bold}</style>';
+        $html .= '<style>body{font-family:sans-serif;font-size:11px}table{width:100%;border-collapse:collapse;margin-bottom:18px}th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}th{background:#f3f4f6;font-weight:600}.summary td{font-size:12px;padding:6px 10px}h2{color:#E8A0BF;margin-bottom:4px}h3{margin-top:14px;margin-bottom:6px}.badge-online{color:#15803d;font-weight:bold}.badge-offline{color:#c2410c;font-weight:bold}.logo{font-size:24px;font-weight:bold;color:#E8A0BF;margin-bottom:4px}.sig-block{margin-top:40px;text-align:right}.sig-line{border-top:1px solid #000;width:200px;margin:0 auto 4px}.sig-name{font-weight:bold;font-size:11px}.sig-title{font-size:10px;color:#666}</style>';
         $html .= '</head><body>';
-        $html .= '<h2>Laporan Penjualan Nurfa Beauty</h2>';
+        $html .= '<div class="logo">Nurfa Beauty</div>';
+        $html .= '<h2>Laporan Penjualan</h2>';
         $html .= '<p>Periode: ' . date('d M Y', strtotime($startDate)) . ' - ' . date('d M Y', strtotime($endDate)) . '</p>';
 
         $html .= '<h3>Ringkasan Penjualan</h3><table class="summary">';
@@ -478,13 +479,13 @@ class Report extends BaseController
         $html .= '</table>';
 
         $html .= '<h3>Breakdown Harian (Beli Online vs Offline)</h3><table>';
-        $html .= '<tr><th>Tanggal</th><th>Total Trx</th><th>Beli Online</th><th>Beli Offline</th><th>Total Pendapatan</th></tr>';
+        $html .= '<tr><th>Tanggal</th><th>Total Transaksi</th><th>Beli Online</th><th>Beli Offline</th><th>Total Pendapatan</th></tr>';
         foreach ($breakdown as $row) {
             $html .= '<tr>';
             $html .= '<td>' . date('d M Y', strtotime($row['period_label'] ?? '')) . '</td>';
             $html .= '<td>' . (int) ($row['transaction_count'] ?? 0) . '</td>';
-            $html .= '<td><span class="badge-online">' . (int) ($row['online_count'] ?? 0) . ' trx</span> (Rp ' . number_format((int) ($row['online_revenue'] ?? 0), 0, ',', '.') . ')</td>';
-            $html .= '<td><span class="badge-offline">' . (int) ($row['offline_count'] ?? 0) . ' trx</span> (Rp ' . number_format((int) ($row['offline_revenue'] ?? 0), 0, ',', '.') . ')</td>';
+            $html .= '<td><span class="badge-online">' . (int) ($row['online_count'] ?? 0) . ' transaksi</span> (Rp ' . number_format((int) ($row['online_revenue'] ?? 0), 0, ',', '.') . ')</td>';
+            $html .= '<td><span class="badge-offline">' . (int) ($row['offline_count'] ?? 0) . ' transaksi</span> (Rp ' . number_format((int) ($row['offline_revenue'] ?? 0), 0, ',', '.') . ')</td>';
             $html .= '<td><strong>Rp ' . number_format((int) ($row['period_revenue'] ?? 0), 0, ',', '.') . '</strong></td>';
             $html .= '</tr>';
         }
@@ -503,6 +504,13 @@ class Report extends BaseController
             }
             $html .= '</table>';
         }
+
+        $html .= '<div class="sig-block">';
+        $html .= '<div style="width:200px;margin-left:auto">';
+        $html .= '<div class="sig-line"></div>';
+        $html .= '<div class="sig-name">(........................)</div>';
+        $html .= '<div class="sig-title">Penanggung Jawab</div>';
+        $html .= '</div></div>';
 
         $html .= '</body></html>';
 
@@ -583,10 +591,10 @@ class Report extends BaseController
 
         // Breakdown header
         $sheet->setCellValue('A10', 'Tanggal');
-        $sheet->setCellValue('B10', 'Total Trx');
-        $sheet->setCellValue('C10', 'Trx Online');
+        $sheet->setCellValue('B10', 'Total Transaksi');
+        $sheet->setCellValue('C10', 'Transaksi Online');
         $sheet->setCellValue('D10', 'Omset Online');
-        $sheet->setCellValue('E10', 'Trx Offline');
+        $sheet->setCellValue('E10', 'Transaksi Offline');
         $sheet->setCellValue('F10', 'Omset Offline');
         $sheet->setCellValue('G10', 'Total Pendapatan');
         $sheet->getStyle('A10:G10')->getFont()->setBold(true);

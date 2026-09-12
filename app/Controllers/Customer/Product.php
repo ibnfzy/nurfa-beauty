@@ -79,9 +79,12 @@ class Product extends BaseController
             $bundleComponents = $this->productModel->getBundleComponents($product['bundle_products']);
         }
 
+        $variants = !empty($product['variants']) ? json_decode($product['variants'], true) : null;
+
         $data = [
             'pageTitle'         => $product['name'] ?? 'Produk',
             'product'           => $product ?? [],
+            'variants'          => $variants,
             'avgRating'         => $reviewStats ? round($reviewStats['avg_rating'] ?? 0, 1) : 0,
             'reviewCount'       => $reviewStats ? ($reviewStats['review_count'] ?? 0) : 0,
             'reviews'           => $reviews ?? [],

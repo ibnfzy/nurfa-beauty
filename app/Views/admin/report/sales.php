@@ -85,20 +85,20 @@
         ]) ?>
         <?= view('components/stat-card', [
             'title'   => 'Total Transaksi',
-            'value'   => number_format($totalTransactions, 0, ',', '.') . ' Trx',
+            'value'   => number_format($totalTransactions, 0, ',', '.') . ' Transaksi',
             'icon'    => 'receipt',
             'color'   => 'info',
         ]) ?>
         <?= view('components/stat-card', [
             'title'   => 'Beli Online (Web)',
-            'value'   => number_format($onlineTransactions ?? 0, 0, ',', '.') . ' Trx',
+            'value'   => number_format($onlineTransactions ?? 0, 0, ',', '.') . ' Transaksi',
             'icon'    => 'globe',
             'color'   => 'primary',
             'footer'  => 'Omset: Rp ' . number_format($onlineRevenue ?? 0, 0, ',', '.'),
         ]) ?>
         <?= view('components/stat-card', [
             'title'   => 'Beli Offline (Toko)',
-            'value'   => number_format($offlineTransactions ?? 0, 0, ',', '.') . ' Trx',
+            'value'   => number_format($offlineTransactions ?? 0, 0, ',', '.') . ' Transaksi',
             'icon'    => 'store',
             'color'   => 'warning',
             'footer'  => 'Omset: Rp ' . number_format($offlineRevenue ?? 0, 0, ',', '.'),
@@ -162,14 +162,14 @@
                         $output .= '<td class="py-3 px-4 text-gray-700 font-semibold">' . number_format((int) ($row['transaction_count'] ?? 0), 0, ',', '.') . '</td>';
                         $output .= '<td class="py-3 px-4">';
                         $output .= '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700">';
-                        $output .= '<i data-lucide="globe" class="w-3 h-3"></i> ' . $onlineCount . ' trx';
+                        $output .= '<i data-lucide="globe" class="w-3 h-3"></i> ' . $onlineCount . ' transaksi';
                         $output .= '</span>';
                         $output .= '<span class="block text-[11px] text-gray-500 mt-0.5">Rp ' . number_format($onlineRev, 0, ',', '.') . '</span>';
                         $output .= '</td>';
 
                         $output .= '<td class="py-3 px-4">';
                         $output .= '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-orange-100 text-orange-700">';
-                        $output .= '<i data-lucide="store" class="w-3 h-3"></i> ' . $offlineCount . ' trx';
+                        $output .= '<i data-lucide="store" class="w-3 h-3"></i> ' . $offlineCount . ' transaksi';
                         $output .= '</span>';
                         $output .= '<span class="block text-[11px] text-gray-500 mt-0.5">Rp ' . number_format($offlineRev, 0, ',', '.') . '</span>';
                         $output .= '</td>';
