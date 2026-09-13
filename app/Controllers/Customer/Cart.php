@@ -102,15 +102,20 @@ class Cart extends BaseController
         // Validasi stok berdasarkan varian jika ada
         if (!empty($variants) && !empty($variantSelection)) {
             $selectedVariant = json_decode($variantSelection, true);
-            foreach ($selectedVariant as $key => $val) {
-                $found = false;
-                foreach ($variants as $variant) {
-                    if (isset($variant[$key]) && $variant[$key] == $val) {
-                        $found = true;
-                        break;
-                    }
+            $available = [];
+            foreach ($variants as $attributeName => $attributeValues) {
+                if (is_array($attributeValues)) {
+                    $available[$attributeName] = $attributeValues;
                 }
-                if (!$found) {
+            }
+
+            if (!is_array($selectedVariant) || count($selectedVariant) !== count($available)) {
+                return redirect()->back()
+                    ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih semua varian produk.']);
+            }
+
+            foreach ($available as $name => $values) {
+                if (!isset($selectedVariant[$name]) || !in_array($selectedVariant[$name], $values, true)) {
                     return redirect()->back()
                         ->with('toast', ['type' => 'error', 'message' => 'Varian yang dipilih tidak valid.']);
                 }

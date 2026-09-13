@@ -25,6 +25,24 @@
     isActive: <?= $product['is_active'] ? 'true' : 'false' ?>,
     isBundle: <?= ($product['is_bundle'] ?? 0) ? 'true' : 'false' ?>,
     bundleItems: <?= htmlspecialchars($product['bundle_products'] ?? '[]', ENT_QUOTES, 'UTF-8') ?>,
+    variantItems: <?php
+        $variantsJson = $product['variants'] ?? '';
+        $variantsDecoded = json_decode((string) $variantsJson, true);
+        $variantsNormalized = [];
+        if (is_array($variantsDecoded)) {
+            foreach ($variantsDecoded as $attributeName => $attributeValues) {
+                if (!is_array($attributeValues)) {
+                    continue;
+                }
+                foreach ($attributeValues as $attributeValue) {
+                    $variantsNormalized[] = [
+                        'attribute_name' => (string) $attributeName,
+                        'attribute_value' => (string) $attributeValue,
+                    ];
+                }
+            }
+        }
+    ?> <?= htmlspecialchars(json_encode($variantsNormalized), ENT_QUOTES, 'UTF-8') ?>,
     showLightbox: false,
     lightboxImage: '',
     openLightbox(src) {
@@ -47,8 +65,29 @@
     removeBundleItem(index) {
         this.bundleItems.splice(index, 1);
     },
+    addVariant() {
+        this.variantItems.push({ attribute_name: '', attribute_value: '' });
+    },
+    addVariantValue(index) {
+        const name = this.variantItems[index].attribute_name?.trim();
+        if (!name) return;
+        this.variantItems.splice(index + 1, 0, {
+            attribute_name: name,
+            attribute_value: ''
+        });
+    },
+    isLastVariantForAttribute(index) {
+        const attributeName = this.variantItems[index].attribute_name;
+        return attributeName && !this.variantItems.slice(index + 1).some(item => item.attribute_name === attributeName);
+    },
+    removeVariant(index) {
+        this.variantItems.splice(index, 1);
+    },
     getBundleJson() {
         return JSON.stringify(this.bundleItems.filter(item => item.product_id));
+    },
+    getVariantsJson() {
+        return JSON.stringify(this.variantItems.filter(item => item.attribute_name && item.attribute_value));
     }
 }">
 
@@ -170,6 +209,39 @@
                                 rows="4"
                                 class="input-field"
                                 placeholder="Masukkan deskripsi produk (opsional)"><?= old('description', $product['description']) ?></textarea>
+                        </div>
+
+                        <!-- Varian Produk -->
+                        <div class="border-t border-gray-100 pt-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-700">Varian Produk</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Tambahkan kombinasi atribut seperti warna atau ukuran (opsional)</p>
+                                </div>
+                                <button type="button" @click="addVariant()" class="text-sm text-primary hover:text-primary-dark font-medium inline-flex items-center gap-1">
+                                    <i data-lucide="plus" class="w-4 h-4"></i>
+                                    Tambah Atribut
+                                </button>
+                            </div>
+
+                            <template x-for="(variant, index) in variantItems" :key="index">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <input type="text" x-model="variant.attribute_name" class="input-field w-40" placeholder="Nama atribut (contoh: Warna)">
+                                    <input type="text" x-model="variant.attribute_value" class="input-field flex-1" placeholder="Nilai (contoh: Merah)">
+                                    <button type="button" x-show="isLastVariantForAttribute(index)" @click.prevent.stop="addVariantValue(index)" class="relative z-10 cursor-pointer p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="Tambah nilai atribut ini">
+                                        <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
+                                    </button>
+                                    <button type="button" @click="removeVariant(index)" class="p-2 text-danger hover:bg-red-50 rounded-lg transition-colors" title="Hapus variant">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <div x-show="variantItems.length === 0" class="text-center py-4 text-sm text-gray-400">
+                                Belum ada atribut. Atribut yang sama akan ditampilkan sebagai satu grup pilihan di halaman produk.
+                            </div>
+
+                            <input type="hidden" name="variants" :value="getVariantsJson()">
                         </div>
 
                         <!-- Tipe Produk: Bundle -->

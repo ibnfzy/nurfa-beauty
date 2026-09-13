@@ -145,19 +145,8 @@
                             <h3 class="text-sm font-semibold text-gray-700 mb-3">Pilih Varian</h3>
                             <div class="space-y-3">
                                 <?php
-                                    // Extract unique variant attribute keys and values
-                                    $variantKeys = [];
-                                    $variantValues = [];
-                                    foreach ($variants as $v) {
-                                        foreach ($v as $key => $value) {
-                                            if (!isset($variantKeys[$key])) {
-                                                $variantKeys[$key] = [];
-                                            }
-                                            if (!in_array($value, $variantKeys[$key])) {
-                                                $variantKeys[$key][] = $value;
-                                            }
-                                        }
-                                    }
+                                    // Format: {"attribute_name": ["val1","val2"]}
+                                    $variantKeys = is_array($variants) ? $variants : [];
                                 ?>
                                 <?php foreach ($variantKeys as $attrName => $attrValues): ?>
                                     <div>

@@ -56,7 +56,14 @@
     <!-- Chart Section -->
     <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 p-6">
         <h3 class="font-semibold text-gray-800 mb-4">Penjualan Harian (30 Hari Terakhir)</h3>
-        <div x-data="{
+        <div x-data="salesChartData" class="relative" style="height: 300px;">
+            <canvas x-ref="salesChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('salesChartData', () => ({
             chart: null,
             labels: <?= json_encode($chartLabels ?? []) ?>,
             data: <?= json_encode($chartData ?? []) ?>,
@@ -107,10 +114,9 @@
                     });
                 });
             }
-        }" class="relative" style="height: 300px;">
-            <canvas x-ref="salesChart"></canvas>
-        </div>
-    </div>
+        }));
+    });
+    </script>
 
     <!-- Bottom Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -102,6 +102,8 @@ class Product extends BaseController
         $imageName = $image->getRandomName();
         $image->move(FCPATH . 'uploads/products', $imageName);
 
+        $variants = $this->normalizeVariants($this->request->getPost('variants'));
+
         $this->productModel->save([
             'category_id'    => $this->request->getPost('category_id'),
             'name'           => $this->request->getPost('name'),
@@ -113,6 +115,7 @@ class Product extends BaseController
             'is_bundle'      => $this->request->getPost('is_bundle') ? 1 : 0,
             'bundle_products' => $this->request->getPost('is_bundle') ? $this->request->getPost('bundle_products') : null,
             'bundle_discount' => $this->request->getPost('bundle_discount') ?: 0,
+            'variants'        => $variants,
         ]);
 
         return redirect()->to('/admin/products')
@@ -188,6 +191,7 @@ class Product extends BaseController
         }
 
         $isBundle = $this->request->getPost('is_bundle') ? 1 : 0;
+        $variants = $this->normalizeVariants($this->request->getPost('variants'));
 
         $data = [
             'category_id'    => $this->request->getPost('category_id'),
@@ -199,6 +203,7 @@ class Product extends BaseController
             'is_bundle'      => $isBundle,
             'bundle_products' => $isBundle ? $this->request->getPost('bundle_products') : null,
             'bundle_discount' => $this->request->getPost('bundle_discount') ?: 0,
+            'variants'        => $variants,
         ];
 
         $image = $this->request->getFile('image');
@@ -221,6 +226,35 @@ class Product extends BaseController
 
         return redirect()->to('/admin/products')
             ->with('toast', ['type' => 'success', 'message' => 'Produk berhasil diperbarui!']);
+    }
+
+    protected function normalizeVariants(?string $variants): ?string
+    {
+        if (!$variants) {
+            return null;
+        }
+
+        $items = json_decode($variants, true);
+        if (!is_array($items)) {
+            return null;
+        }
+
+        $merged = [];
+        foreach ($items as $item) {
+            $name  = trim((string) ($item['attribute_name'] ?? ''));
+            $value = trim((string) ($item['attribute_value'] ?? ''));
+            if ($name === '' || $value === '') {
+                continue;
+            }
+            if (!isset($merged[$name])) {
+                $merged[$name] = [];
+            }
+            if (!in_array($value, $merged[$name], true)) {
+                $merged[$name][] = $value;
+            }
+        }
+
+        return $merged ? json_encode($merged, JSON_UNESCAPED_UNICODE) : null;
     }
 
     public function delete(int $id)

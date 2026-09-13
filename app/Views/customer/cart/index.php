@@ -20,6 +20,43 @@
 
     <h1 class="text-2xl font-semibold text-gray-800 mb-6">Keranjang Belanja</h1>
 
+    <!-- Panduan Belanja -->
+    <section class="rounded-2xl border border-primary/10 bg-white p-5 sm:p-6 mb-6 shadow-sm" aria-labelledby="panduan-belanja-title">
+        <div class="mb-5">
+            <p class="text-xs font-semibold uppercase tracking-wider text-primary mb-2">Panduan Belanja</p>
+            <h2 id="panduan-belanja-title" class="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">Cara menyelesaikan pesanan</h2>
+            <p class="text-sm text-gray-600 leading-relaxed">Ikuti langkah berikut agar proses pemesanan berjalan lancar sampai pembayaran selesai.</p>
+        </div>
+
+        <ol class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <li class="rounded-xl bg-cream/60 border border-primary/10 p-4">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-bold mb-3">1</span>
+                <h3 class="font-semibold text-gray-900 mb-1">Periksa keranjang</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Pastikan produk, varian, dan jumlah yang dipilih sudah sesuai.</p>
+            </li>
+            <li class="rounded-xl bg-cream/60 border border-primary/10 p-4">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-bold mb-3">2</span>
+                <h3 class="font-semibold text-gray-900 mb-1">Lanjutkan checkout</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Klik tombol checkout, lalu pilih alamat dan metode pengiriman.</p>
+            </li>
+            <li class="rounded-xl bg-cream/60 border border-primary/10 p-4">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-bold mb-3">3</span>
+                <h3 class="font-semibold text-gray-900 mb-1">Tinjau pesanan</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Periksa kembali detail pesanan dan total pembayaran sebelum melanjutkan.</p>
+            </li>
+            <li class="rounded-xl bg-cream/60 border border-primary/10 p-4">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-sm font-bold mb-3">4</span>
+                <h3 class="font-semibold text-gray-900 mb-1">Selesaikan pembayaran</h3>
+                <p class="text-sm text-gray-600 leading-relaxed">Pilih metode pembayaran dan selesaikan pembayaran agar pesanan diproses.</p>
+            </li>
+        </ol>
+
+        <div class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+            <p class="font-semibold text-sm sm:text-base mb-2">Peringatan ketersediaan stok</p>
+            <p class="text-sm sm:text-base leading-relaxed">Ketika Anda sudah memasukkan produk ke dalam keranjang dan tidak segera melakukan checkout, kami tidak bertanggung jawab jika stok produk tersebut habis dan Anda tidak dapat membelinya karena ada pembeli lain yang melakukan checkout lebih dahulu. Produk yang hanya dimasukkan ke dalam keranjang tetapi belum selesai checkout tidak akan menyimpan stok barang secara permanen. Jika ada pembeli lain yang menyelesaikan proses checkout lebih awal, Anda tidak akan dapat membeli produk tersebut meskipun produk itu masih ada di dalam keranjang Anda.</p>
+        </div>
+    </section>
+
     <?php if (empty($cartItems ?? [])): ?>
         <!-- Empty State -->
         <?= view('components/empty-state', [

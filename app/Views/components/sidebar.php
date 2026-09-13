@@ -50,6 +50,11 @@ $pendingPaymentCount = $pendingPaymentCount ?? 0;
                   <?= strpos(uri_string(), 'admin/payments') === 0 ? 'bg-primary-light text-primary-dark' : 'text-gray-600 hover:bg-cream hover:text-primary' ?>">
             <i data-lucide="credit-card" class="w-5 h-5"></i>
             <span class="flex-1">Verifikasi Bayar</span>
+            <?php if ($pendingPaymentCount == 0): ?>
+                <span class="bg-danger text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
+                    0
+                </span>
+            <?php endif; ?>
             <?php if ($pendingPaymentCount > 0): ?>
                 <span class="bg-danger text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
                     <?= $pendingPaymentCount > 99 ? '99+' : $pendingPaymentCount ?>
@@ -73,6 +78,16 @@ $pendingPaymentCount = $pendingPaymentCount ?? 0;
                   <?= strpos(uri_string(), 'admin/notifications') === 0 ? 'bg-primary-light text-primary-dark' : 'text-gray-600 hover:bg-cream hover:text-primary' ?>">
             <i data-lucide="bell" class="w-5 h-5"></i>
             Notifikasi
+            <?php if ($unreadNotificationCount == 0): ?>
+                <span class="bg-danger text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
+                    0
+                </span>
+            <?php endif; ?>
+            <?php if ($unreadNotificationCount > 0): ?>
+                <span class="bg-danger text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
+                    <?= $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount ?>
+                </span>
+            <?php endif; ?>
         </a>
         <a href="<?= base_url('admin/report') ?>"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium

@@ -48,6 +48,7 @@ abstract class BaseController extends Controller
             $adminService = new AdminDashboardService();
             \Config\Services::renderer()->setData([
                 'pendingPaymentCount' => $adminService->getPendingPaymentCount(),
+                'unreadNotificationCount' => $adminService->getUnreadNotificationCount(),
             ]);
         }
     }
