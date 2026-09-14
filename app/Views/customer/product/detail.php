@@ -134,8 +134,19 @@
                 <form action="<?= base_url('cart/add') ?>" method="POST" class="mt-auto" x-data="{ 
                     quantity: 1,
                     selectedVariant: {},
-                    variantOptions: <?= !empty($variants) ? json_encode($variants) : '[]' ?>
-                }">
+                    variantOptions: <?= esc(json_encode($variants ?? []), 'html') ?>,
+                    variantError: '',
+                    hasAllVariantsSelected() {
+                        return Object.keys(this.variantOptions).length === Object.keys(this.selectedVariant).length
+                            && Object.keys(this.variantOptions).every(key => this.selectedVariant[key]);
+                    },
+                    validateVariant() {
+                        this.variantError = Object.keys(this.variantOptions).length > 0 && !this.hasAllVariantsSelected()
+                            ? 'Silakan pilih semua varian produk terlebih dahulu.'
+                            : '';
+                        return !this.variantError;
+                    }
+                }" @submit="if (!validateVariant()) $event.preventDefault()">
                     <?= csrf_field() ?>
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?? 0 ?>">
 
@@ -151,13 +162,13 @@
                                 <?php foreach ($variantKeys as $attrName => $attrValues): ?>
                                     <div>
                                         <label class="text-xs font-medium text-gray-600 block mb-1.5">
-                                            <?= ucfirst($attrName) ?>
+                                            <?= esc(ucfirst($attrName)) ?>
                                         </label>
                                         <div class="flex flex-wrap gap-2">
                                             <?php foreach ($attrValues as $val): ?>
                                                 <button type="button"
-                                                    @click="selectedVariant['<?= $attrName ?>'] = '<?= $val ?>'"
-                                                    :class="selectedVariant['<?= $attrName ?>'] === '<?= $val ?>' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'"
+                                                    @click="selectedVariant['<?= esc($attrName, 'js') ?>'] = '<?= esc($val, 'js') ?>'"
+                                                    :class="selectedVariant['<?= esc($attrName, 'js') ?>'] === '<?= esc($val, 'js') ?>' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'"
                                                     class="px-3 py-2 border rounded-lg text-xs font-medium transition-colors">
                                                     <?= esc($val) ?>
                                                 </button>
@@ -167,6 +178,7 @@
                                 <?php endforeach; ?>
                             </div>
                             <input type="hidden" name="variant_selection" :value="Object.keys(selectedVariant).length > 0 ? JSON.stringify(selectedVariant) : ''">
+                            <p x-show="variantError" x-text="variantError" class="text-sm text-red-600 mt-2" role="alert"></p>
                         </div>
                     <?php endif; ?>
 

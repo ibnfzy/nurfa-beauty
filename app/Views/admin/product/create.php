@@ -87,7 +87,7 @@
                     <h4 class="text-sm font-semibold text-red-800 mb-1">Terjadi kesalahan:</h4>
                     <ul class="text-sm text-red-700 space-y-1">
                         <?php foreach (session('errors') as $error): ?>
-                            <li><?= $error ?></li>
+                            <li><?= esc($error) ?></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -149,7 +149,7 @@
                                         type="number"
                                         id="price"
                                         name="price"
-                                        value="<?= old('price') ?>"
+                                        value="<?= esc(old('price')) ?>"
                                         required
                                         min="0"
                                         step="any"
@@ -165,7 +165,7 @@
                                     type="number"
                                     id="stock"
                                     name="stock"
-                                    value="<?= old('stock') ?? 0 ?>"
+                                    value="<?= esc(old('stock') ?? 0) ?>"
                                     required
                                     min="0"
                                     class="input-field"

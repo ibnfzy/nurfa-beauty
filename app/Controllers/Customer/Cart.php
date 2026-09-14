@@ -123,10 +123,17 @@ class Cart extends BaseController
         }
 
         // Cek stok
-        $existingCart = $this->cartModel
+        $existingCartQuery = $this->cartModel
             ->where('customer_id', $customerId)
-            ->where('product_id', $productId)
-            ->first();
+            ->where('product_id', $productId);
+
+        if ($variantSelection === null) {
+            $existingCartQuery->where('variant_selection', null);
+        } else {
+            $existingCartQuery->where('variant_selection', $variantSelection);
+        }
+
+        $existingCart = $existingCartQuery->first();
 
         $totalQuantity = $quantity + ($existingCart['quantity'] ?? 0);
 

@@ -9,7 +9,6 @@ class ProductSeeder extends Seeder
     public function run()
     {
         $image = '1785649634_ee7adeaf1d8789615eea.jpeg';
-        $now   = date('Y-m-d H:i:s');
 
         $data = [
             // Makeup (category_id = 4)
@@ -24,8 +23,10 @@ class ProductSeeder extends Seeder
                 'is_bundle'        => 0,
                 'bundle_products'  => null,
                 'bundle_discount'  => 0,
-                'created_at'       => $now,
-                'updated_at'       => $now,
+                'variants'         => json_encode([
+                    'Warna' => ['Coklat Natural', 'Coklat Muda', 'Taupe'],
+                    'Ukuran' => ['0.8 gram', '1.2 gram', '1.5 gram'],
+                ], JSON_UNESCAPED_UNICODE),
             ],
             [
                 'category_id'      => 4,
@@ -38,8 +39,10 @@ class ProductSeeder extends Seeder
                 'is_bundle'        => 0,
                 'bundle_products'  => null,
                 'bundle_discount'  => 0,
-                'created_at'       => $now,
-                'updated_at'       => $now,
+                'variants'         => json_encode([
+                    'Warna' => ['Coklat Gelap', 'Coklat Tua', 'Maroon'],
+                    'Ukuran' => ['0.8 gram', '1.2 gram', '1.5 gram'],
+                ], JSON_UNESCAPED_UNICODE),
             ],
             [
                 'category_id'      => 4,
@@ -52,8 +55,10 @@ class ProductSeeder extends Seeder
                 'is_bundle'        => 0,
                 'bundle_products'  => null,
                 'bundle_discount'  => 0,
-                'created_at'       => $now,
-                'updated_at'       => $now,
+                'variants'         => json_encode([
+                    'Warna' => ['Hitam'],
+                    'Ukuran' => ['1.2 gram'],
+                ], JSON_UNESCAPED_UNICODE),
             ],
             [
                 'category_id'      => 4,
@@ -66,8 +71,10 @@ class ProductSeeder extends Seeder
                 'is_bundle'        => 0,
                 'bundle_products'  => null,
                 'bundle_discount'  => 0,
-                'created_at'       => $now,
-                'updated_at'       => $now,
+                'variants'         => json_encode([
+                    'Warna' => ['Abu-Abu'],
+                    'Ukuran' => ['1.2 gram'],
+                ], JSON_UNESCAPED_UNICODE),
             ],
             [
                 'category_id'      => 4,
@@ -80,8 +87,7 @@ class ProductSeeder extends Seeder
                 'is_bundle'        => 1,
                 'bundle_products'  => null,
                 'bundle_discount'  => 15.00,
-                'created_at'       => $now,
-                'updated_at'       => $now,
+                'variants'         => null,
             ],
         ];
 

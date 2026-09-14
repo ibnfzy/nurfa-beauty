@@ -218,7 +218,15 @@
                             $output .= '<i data-lucide="image" class="w-4 h-4 text-gray-400"></i>';
                             $output .= '</div>';
                         }
+                        $output .= '<div>';
                         $output .= '<span class="font-medium text-gray-800">' . esc($item['product_name'] ?? '-') . '</span>';
+                        $variantSelection = $item['variant_selection'] ?? null;
+                        if (is_string($variantSelection)) $variantSelection = json_decode($variantSelection, true);
+                        if (is_array($variantSelection) && !empty($variantSelection)) {
+                            $variantLabel = implode(', ', array_map(static fn ($key, $value) => $key . ': ' . $value, array_keys($variantSelection), $variantSelection));
+                            $output .= '<p class="text-xs text-gray-500 mt-1">Varian: ' . esc($variantLabel) . '</p>';
+                        }
+                        $output .= '</div>';
                         $output .= '</div>';
                         $output .= '</td>';
                         $output .= '<td class="py-3 px-4 text-gray-600">Rp ' . number_format($item['price'] ?? 0, 0, ',', '.') . '</td>';

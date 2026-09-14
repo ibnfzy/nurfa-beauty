@@ -152,6 +152,11 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="text-sm font-medium text-gray-800"><?= esc($item['product_name'] ?? '') ?></h4>
+                                        <?php $variantSelection = $item['variant_selection'] ?? null; ?>
+                                        <?php if (is_string($variantSelection)) $variantSelection = json_decode($variantSelection, true); ?>
+                                        <?php if (is_array($variantSelection) && !empty($variantSelection)): ?>
+                                            <p class="text-xs text-gray-500 mt-1">Varian: <?= esc(implode(', ', array_map(static fn ($key, $value) => $key . ': ' . $value, array_keys($variantSelection), $variantSelection))) ?></p>
+                                        <?php endif; ?>
                                         <p class="text-xs text-gray-500 mt-0.5"><?= $item['quantity'] ?? 0 ?> x Rp <?= number_format($item['product_price'] ?? 0, 0, ',', '.') ?></p>
                                     </div>
                                     <p class="text-sm font-semibold text-gray-800">

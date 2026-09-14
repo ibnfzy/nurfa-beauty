@@ -46,6 +46,24 @@ class Report extends BaseController
     }
 
     /**
+     * Return logo as base64 data URI for Dompdf (reliable without isRemoteEnabled).
+     */
+    private function getLogoDataUri(): string
+    {
+        $path = FCPATH . 'logo.png';
+        if (! is_file($path)) {
+            return '';
+        }
+        $mime = function_exists('mime_content_type') ? (mime_content_type($path) ?: 'image/png') : 'image/png';
+        $data = @file_get_contents($path);
+        if ($data === false || $data === '') {
+            return '';
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode($data);
+    }
+
+    /**
      * Halaman overview laporan
      */
     public function index()
@@ -156,6 +174,7 @@ class Report extends BaseController
         // Top selling products
         $topProducts = $this->db->table('transaction_items')
             ->select('products.name as product_name')
+            ->select('GROUP_CONCAT(DISTINCT transaction_items.variant_selection SEPARATOR "||") as variant_selections')
             ->select('SUM(transaction_items.quantity) as total_qty')
             ->select('SUM(transaction_items.subtotal) as total_revenue')
             ->join('transactions', 'transactions.id = transaction_items.transaction_id')
@@ -450,6 +469,7 @@ class Report extends BaseController
 
         $topProducts = $this->db->table('transaction_items')
             ->select('products.name as product_name')
+            ->select('GROUP_CONCAT(DISTINCT transaction_items.variant_selection SEPARATOR "||") as variant_selections')
             ->select('SUM(transaction_items.quantity) as total_qty')
             ->select('SUM(transaction_items.subtotal) as total_revenue')
             ->join('transactions', 'transactions.id = transaction_items.transaction_id')
@@ -463,10 +483,11 @@ class Report extends BaseController
             ->get()
             ->getResultArray();
 
+        $logoDataUri = $this->getLogoDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:11px}table{width:100%;border-collapse:collapse;margin-bottom:18px}th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}th{background:#f3f4f6;font-weight:600}.summary td{font-size:12px;padding:6px 10px}h2{color:#E8A0BF;margin-bottom:4px}h3{margin-top:14px;margin-bottom:6px}.badge-online{color:#15803d;font-weight:bold}.badge-offline{color:#c2410c;font-weight:bold}.logo{font-size:24px;font-weight:bold;color:#E8A0BF;margin-bottom:4px}.sig-block{margin-top:40px;text-align:right}.sig-line{border-top:1px solid #000;width:200px;margin:0 auto 4px}.sig-name{font-weight:bold;font-size:11px}.sig-title{font-size:10px;color:#666}</style>';
+        $html .= '<style>body{font-family:sans-serif;font-size:11px}table{width:100%;border-collapse:collapse;margin-bottom:18px}th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}th{background:#f3f4f6;font-weight:600}.summary td{font-size:12px;padding:6px 10px}h2{color:#E8A0BF;margin-bottom:4px}h3{margin-top:14px;margin-bottom:6px}.badge-online{color:#15803d;font-weight:bold}.badge-offline{color:#c2410c;font-weight:bold}.logo{margin-bottom:12px}.logo img{max-width:150px;height:auto}.sig-block{margin-top:40px;text-align:right}.sig-line{border-top:1px solid #000;width:200px;margin:0 auto 4px}.sig-name{font-weight:bold;font-size:11px}.sig-title{font-size:10px;color:#666}</style>';
         $html .= '</head><body>';
-        $html .= '<div class="logo">Nurfa Beauty</div>';
+        $html .= $logoDataUri !== '' ? '<div class="logo"><img src="' . $logoDataUri . '" alt="Nurfa Beauty"></div>' : '';
         $html .= '<h2>Laporan Penjualan</h2>';
         $html .= '<p>Periode: ' . date('d M Y', strtotime($startDate)) . ' - ' . date('d M Y', strtotime($endDate)) . '</p>';
 
@@ -497,7 +518,18 @@ class Report extends BaseController
             foreach ($topProducts as $i => $prod) {
                 $html .= '<tr>';
                 $html .= '<td>' . ($i + 1) . '</td>';
-                $html .= '<td>' . esc($prod['product_name'] ?? '') . '</td>';
+                $variantLabels = [];
+                foreach (explode('||', (string) ($prod['variant_selections'] ?? '')) as $variantJson) {
+                    $variant = json_decode($variantJson, true);
+                    if (is_array($variant) && !empty($variant)) {
+                        $variantLabels[] = implode(', ', array_map(static fn ($key, $value) => $key . ': ' . $value, array_keys($variant), $variant));
+                    }
+                }
+                $productLabel = esc($prod['product_name'] ?? '');
+                if (!empty($variantLabels)) {
+                    $productLabel .= '<br><small>Varian: ' . esc(implode(' | ', $variantLabels)) . '</small>';
+                }
+                $html .= '<td>' . $productLabel . '</td>';
                 $html .= '<td>' . (int) ($prod['total_qty'] ?? 0) . '</td>';
                 $html .= '<td>Rp ' . number_format((int) ($prod['total_revenue'] ?? 0), 0, ',', '.') . '</td>';
                 $html .= '</tr>';
@@ -652,9 +684,11 @@ class Report extends BaseController
             ->limit(10)
             ->findAll();
 
+        $logoDataUri = $this->getLogoDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f3f4f6;font-weight:600}h2{color:#E8A0BF}h3{margin-top:20px}</style>';
+        $html .= '<style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f3f4f6;font-weight:600}h2{color:#E8A0BF}h3{margin-top:20px}.logo{margin-bottom:12px}.logo img{max-width:150px;height:auto}</style>';
         $html .= '</head><body>';
+        $html .= $logoDataUri !== '' ? '<div class="logo"><img src="' . $logoDataUri . '" alt="Nurfa Beauty"></div>' : '';
         $html .= '<h2>Laporan Pelanggan Nurfa Beauty</h2>';
         $html .= '<p>Tanggal Cetak: ' . date('d M Y') . '</p>';
 
@@ -797,10 +831,12 @@ class Report extends BaseController
         $totalVouchers = $this->voucherModel->countAllResults(false);
         $usedVouchers  = $this->voucherModel->where('is_used', 1)->countAllResults(false);
 
+        $logoDataUri = $this->getLogoDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f3f4f6;font-weight:600}h2{color:#E8A0BF}h3{margin-top:20px}</style>';
+        $html .= '<style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f3f4f6;font-weight:600}h2{color:#E8A0BF}h3{margin-top:20px}.logo{margin-bottom:12px}.logo img{max-width:150px;height:auto}</style>';
         $html .= '</head><body>';
-        $html .= '<h2>Laporan Loyalitas Nurfa Beauty</h2>';
+        $html .= $logoDataUri !== '' ? '<div class="logo"><img src="' . $logoDataUri . '" alt="Nurfa Beauty"></div>' : '';
+        $html .= '<h2>Laporan Loyalitas</h2>';
         $html .= '<p>Tanggal Cetak: ' . date('d M Y') . '</p>';
 
         $html .= '<h3>Ringkasan Poin</h3><table>';

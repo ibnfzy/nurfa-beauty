@@ -112,7 +112,7 @@
                     <h4 class="text-sm font-semibold text-red-800 mb-1">Terjadi kesalahan:</h4>
                     <ul class="text-sm text-red-700 space-y-1">
                         <?php foreach (session('errors') as $error): ?>
-                            <li><?= $error ?></li>
+                            <li><?= esc($error) ?></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -140,7 +140,7 @@
                                 type="text"
                                 id="name"
                                 name="name"
-                                value="<?= old('name', $product['name']) ?>"
+                                value="<?= esc(old('name', $product['name'])) ?>"
                                 required
                                 maxlength="200"
                                 class="input-field"
@@ -174,7 +174,7 @@
                                         type="number"
                                         id="price"
                                         name="price"
-                                        value="<?= old('price', $product['price']) ?>"
+                                        value="<?= esc(old('price', $product['price'])) ?>"
                                         required
                                         min="0"
                                         step="any"
@@ -190,7 +190,7 @@
                                     type="number"
                                     id="stock"
                                     name="stock"
-                                    value="<?= old('stock', $product['stock']) ?>"
+                                    value="<?= esc(old('stock', $product['stock'])) ?>"
                                     required
                                     min="0"
                                     class="input-field"
@@ -208,7 +208,7 @@
                                 name="description"
                                 rows="4"
                                 class="input-field"
-                                placeholder="Masukkan deskripsi produk (opsional)"><?= old('description', $product['description']) ?></textarea>
+                                placeholder="Masukkan deskripsi produk (opsional)"><?= esc(old('description', $product['description'])) ?></textarea>
                         </div>
 
                         <!-- Varian Produk -->
@@ -263,7 +263,7 @@
                                     <label for="bundle_discount" class="block text-sm font-medium text-gray-700 mb-1">
                                         Diskon Bundle (%)
                                     </label>
-                                    <input type="number" id="bundle_discount" name="bundle_discount" value="<?= $product['bundle_discount'] ?? 0 ?>" min="0" max="100" step="0.01" class="input-field" placeholder="0">
+                                    <input type="number" id="bundle_discount" name="bundle_discount" value="<?= esc($product['bundle_discount'] ?? 0) ?>" min="0" max="100" step="0.01" class="input-field" placeholder="0">
                                 </div>
 
                                 <!-- Komponen Bundle -->

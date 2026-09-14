@@ -244,7 +244,18 @@
                     foreach ($topProducts as $prod) {
                         $output .= '<tr class="hover:bg-cream/50 transition-colors">';
                         $output .= '<td class="py-3 px-4 text-gray-500">' . $no++ . '</td>';
-                        $output .= '<td class="py-3 px-4 font-medium text-gray-800">' . esc($prod['product_name'] ?? '-') . '</td>';
+                        $variantLabels = [];
+                        foreach (explode('||', (string) ($prod['variant_selections'] ?? '')) as $variantJson) {
+                            $variant = json_decode($variantJson, true);
+                            if (is_array($variant) && !empty($variant)) {
+                                $variantLabels[] = implode(', ', array_map(static fn ($key, $value) => $key . ': ' . $value, array_keys($variant), $variant));
+                            }
+                        }
+                        $productLabel = esc($prod['product_name'] ?? '-');
+                        if (!empty($variantLabels)) {
+                            $productLabel .= '<span class="block text-xs text-gray-500 font-normal mt-1">Varian: ' . esc(implode(' | ', $variantLabels)) . '</span>';
+                        }
+                        $output .= '<td class="py-3 px-4 font-medium text-gray-800">' . $productLabel . '</td>';
                         $output .= '<td class="py-3 px-4 text-gray-600">' . number_format((int) ($prod['total_qty'] ?? 0), 0, ',', '.') . '</td>';
                         $output .= '<td class="py-3 px-4 font-medium text-gray-800">Rp ' . number_format((int) ($prod['total_revenue'] ?? 0), 0, ',', '.') . '</td>';
                         $output .= '</tr>';

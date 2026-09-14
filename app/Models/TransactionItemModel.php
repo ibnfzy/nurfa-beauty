@@ -17,6 +17,7 @@ class TransactionItemModel extends Model
         'quantity',
         'price',
         'subtotal',
+        'variant_selection',
     ];
 
     // Join dengan transactions

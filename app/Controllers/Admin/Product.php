@@ -98,22 +98,33 @@ class Product extends BaseController
                 ->with('toast', ['type' => 'error', 'message' => 'Gagal menambahkan produk. Periksa kembali data Anda.']);
         }
 
+        $isBundle = $this->request->getPost('is_bundle') ? 1 : 0;
+        $variants = $this->normalizeVariants($this->request->getPost('variants'));
+        $bundleProducts = $isBundle
+            ? $this->normalizeBundleProducts($this->request->getPost('bundle_products'))
+            : null;
+
+        if ($isBundle && $bundleProducts === null) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', ['bundle_products' => 'Produk bundling wajib memiliki minimal satu komponen produk yang valid.'])
+                ->with('toast', ['type' => 'error', 'message' => 'Gagal menambahkan produk. Periksa kembali data Anda.']);
+        }
+
         $image = $this->request->getFile('image');
         $imageName = $image->getRandomName();
         $image->move(FCPATH . 'uploads/products', $imageName);
 
-        $variants = $this->normalizeVariants($this->request->getPost('variants'));
-
         $this->productModel->save([
-            'category_id'    => $this->request->getPost('category_id'),
-            'name'           => $this->request->getPost('name'),
-            'description'    => $this->request->getPost('description'),
-            'price'          => $this->request->getPost('price'),
-            'stock'          => $this->request->getPost('stock'),
-            'image'          => $imageName,
-            'is_active'      => $this->request->getPost('is_active') ?? 1,
-            'is_bundle'      => $this->request->getPost('is_bundle') ? 1 : 0,
-            'bundle_products' => $this->request->getPost('is_bundle') ? $this->request->getPost('bundle_products') : null,
+            'category_id'     => $this->request->getPost('category_id'),
+            'name'            => $this->request->getPost('name'),
+            'description'     => $this->request->getPost('description'),
+            'price'           => $this->request->getPost('price'),
+            'stock'           => $this->request->getPost('stock'),
+            'image'           => $imageName,
+            'is_active'       => $this->request->getPost('is_active') ?? 1,
+            'is_bundle'       => $isBundle,
+            'bundle_products' => $bundleProducts,
             'bundle_discount' => $this->request->getPost('bundle_discount') ?: 0,
             'variants'        => $variants,
         ]);
@@ -192,16 +203,26 @@ class Product extends BaseController
 
         $isBundle = $this->request->getPost('is_bundle') ? 1 : 0;
         $variants = $this->normalizeVariants($this->request->getPost('variants'));
+        $bundleProducts = $isBundle
+            ? $this->normalizeBundleProducts($this->request->getPost('bundle_products'), $id)
+            : null;
+
+        if ($isBundle && $bundleProducts === null) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', ['bundle_products' => 'Produk bundling wajib memiliki minimal satu komponen produk yang valid.'])
+                ->with('toast', ['type' => 'error', 'message' => 'Gagal memperbarui produk. Periksa kembali data Anda.']);
+        }
 
         $data = [
-            'category_id'    => $this->request->getPost('category_id'),
-            'name'           => $this->request->getPost('name'),
-            'description'    => $this->request->getPost('description'),
-            'price'          => $this->request->getPost('price'),
-            'stock'          => $this->request->getPost('stock'),
-            'is_active'      => $this->request->getPost('is_active') ?? 1,
-            'is_bundle'      => $isBundle,
-            'bundle_products' => $isBundle ? $this->request->getPost('bundle_products') : null,
+            'category_id'     => $this->request->getPost('category_id'),
+            'name'            => $this->request->getPost('name'),
+            'description'     => $this->request->getPost('description'),
+            'price'           => $this->request->getPost('price'),
+            'stock'           => $this->request->getPost('stock'),
+            'is_active'       => $this->request->getPost('is_active') ?? 1,
+            'is_bundle'       => $isBundle,
+            'bundle_products' => $bundleProducts,
             'bundle_discount' => $this->request->getPost('bundle_discount') ?: 0,
             'variants'        => $variants,
         ];
@@ -255,6 +276,51 @@ class Product extends BaseController
         }
 
         return $merged ? json_encode($merged, JSON_UNESCAPED_UNICODE) : null;
+    }
+
+    protected function normalizeBundleProducts(?string $bundleProducts, ?int $excludeId = null): ?string
+    {
+        if (!$bundleProducts) {
+            return null;
+        }
+
+        $items = json_decode($bundleProducts, true);
+        if (!is_array($items) || $items === []) {
+            return null;
+        }
+
+        $normalized = [];
+        $seenIds = [];
+
+        foreach ($items as $item) {
+            $productId = (int) ($item['product_id'] ?? 0);
+            $quantity  = (int) ($item['quantity'] ?? 1);
+
+            if ($productId <= 0 || $quantity < 1) {
+                continue;
+            }
+
+            if ($excludeId !== null && $productId === $excludeId) {
+                continue;
+            }
+
+            if (isset($seenIds[$productId])) {
+                continue;
+            }
+
+            $product = $this->productModel->find($productId);
+            if (!$product || !empty($product['is_bundle']) || empty($product['is_active'])) {
+                continue;
+            }
+
+            $seenIds[$productId] = true;
+            $normalized[] = [
+                'product_id' => $productId,
+                'quantity'   => $quantity,
+            ];
+        }
+
+        return $normalized ? json_encode($normalized, JSON_UNESCAPED_UNICODE) : null;
     }
 
     public function delete(int $id)

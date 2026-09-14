@@ -195,7 +195,14 @@
                                                         <i data-lucide="image" class="w-5 h-5 text-gray-400"></i>
                                                     </div>
                                                 <?php endif; ?>
-                                                <span class="text-sm font-medium text-gray-800"><?= esc($item['product_name'] ?? '') ?></span>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-800"><?= esc($item['product_name'] ?? '') ?></span>
+                                                    <?php $variantSelection = $item['variant_selection'] ?? null; ?>
+                                                    <?php if (is_string($variantSelection)) $variantSelection = json_decode($variantSelection, true); ?>
+                                                    <?php if (is_array($variantSelection) && !empty($variantSelection)): ?>
+                                                        <p class="text-xs text-gray-500 mt-1">Varian: <?= esc(implode(', ', array_map(static fn ($key, $value) => $key . ': ' . $value, array_keys($variantSelection), $variantSelection))) ?></p>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
                                         </td>
                                         <td class="py-3 px-2 text-right text-sm text-gray-700">

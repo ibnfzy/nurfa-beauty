@@ -297,13 +297,21 @@ class Checkout extends BaseController
                 ->with('toast', ['type' => 'warning', 'message' => 'Keranjang Anda kosong.']);
         }
 
-        // Verifikasi stok untuk setiap item
+        // Verifikasi varian dan stok untuk setiap item
         foreach ($cartItems as $item) {
             $product = $this->productModel->find($item['product_id']);
             if (!$product || !$product['is_active']) {
                 return redirect()->back()
-                    ->with('toast', ['type' => 'error', 'message' => 'Produk "' . $item['product_name'] . '" tidak tersedia.']);
+                    ->with('toast', ['type' => 'error', 'message' => 'Produk "' . ($item['product_name'] ?? 'ini') . '" tidak tersedia.']);
             }
+
+            $variants = !empty($product['variants']) ? json_decode((string) $product['variants'], true) : [];
+            $selection = !empty($item['variant_selection']) ? json_decode((string) $item['variant_selection'], true) : [];
+            if (!empty($variants) && (!is_array($selection) || count($selection) !== count($variants))) {
+                return redirect()->to('/cart')
+                    ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih semua varian produk sebelum checkout.']);
+            }
+
             if ($item['quantity'] > $product['stock']) {
                 return redirect()->back()
                     ->with('toast', ['type' => 'warning', 'message' => 'Stok produk "' . $item['product_name'] . '" tidak mencukupi.']);
@@ -426,8 +434,9 @@ class Checkout extends BaseController
                 'transaction_id' => $transactionId,
                 'product_id'     => $item['product_id'],
                 'quantity'       => $item['quantity'],
-                'price'          => $item['product_price'],
-                'subtotal'       => $subtotal,
+                'price'             => $item['product_price'],
+                'subtotal'          => $subtotal,
+                'variant_selection' => $item['variant_selection'] ?? null,
             ]);
 
             // Kurangi stok
