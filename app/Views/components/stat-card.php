@@ -12,6 +12,7 @@ $colorMap = [
     'info'      => 'bg-blue-100 text-blue-600',
 ];
 $iconBg = $colorMap[$color ?? 'primary'] ?? $colorMap['primary'];
+$itext = !empty($icontext) && $icontext !== false;
 ?>
 <div class="bg-white rounded-xl shadow-sm border border-primary-light/30 p-6">
     <div class="flex items-center justify-between">
@@ -23,7 +24,11 @@ $iconBg = $colorMap[$color ?? 'primary'] ?? $colorMap['primary'];
             <?php endif; ?>
         </div>
         <div class="w-12 h-12 rounded-xl flex items-center justify-center <?= $iconBg ?>">
-            <i data-lucide="<?= $icon ?? 'bar-chart' ?>" class="w-6 h-6"></i>
+            <?php if ($itext): ?>
+                <?= $icon ?? '' ?>
+            <?php elseif ($itext === false): ?>
+                <i data-lucide="<?= $icon ?? 'bar-chart' ?>" class="w-6 h-6"></i>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -485,29 +485,54 @@ class Report extends BaseController
 
         $logoDataUri = $this->getLogoDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:11px}table{width:100%;border-collapse:collapse;margin-bottom:18px}th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}th{background:#f3f4f6;font-weight:600}.summary td{font-size:12px;padding:6px 10px}h2{color:#E8A0BF;margin-bottom:4px}h3{margin-top:14px;margin-bottom:6px}.badge-online{color:#15803d;font-weight:bold}.badge-offline{color:#c2410c;font-weight:bold}.logo{margin-bottom:12px}.logo img{max-width:150px;height:auto}.sig-block{margin-top:40px;text-align:right}.sig-line{border-top:1px solid #000;width:200px;margin:0 auto 4px}.sig-name{font-weight:bold;font-size:11px}.sig-title{font-size:10px;color:#666}</style>';
+        $html .= '<style>
+            body{font-family:sans-serif;font-size:11px}
+            .header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;width:100%}
+            .header td{vertical-align:middle;border:none;padding:0}
+            .header-logo{width:100px;text-align:left}
+            .header-text{text-align:center;padding-right:20px}
+            .header-name{font-size:16px;font-weight:bold}
+            .report-name{font-size:12px;margin-top:4px}
+            table{width:100%;border-collapse:collapse;margin-bottom:18px}
+            th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}
+            th{background:#f3f4f6;font-weight:600}
+            .summary td{font-size:12px;padding:6px 10px}
+            h3{margin-top:14px;margin-bottom:6px}
+            .badge-online{color:#15803d;font-weight:bold}
+            .badge-offline{color:#c2410c;font-weight:bold}
+            .sig-block{margin-top:40px;text-align:right}
+            .sig-line{border-top:1px solid #000;width:200px;margin:0 auto 4px}
+            .sig-name{font-weight:bold;font-size:11px}
+            .sig-title{font-size:10px;color:#666}
+        </style>';
         $html .= '</head><body>';
-        $html .= $logoDataUri !== '' ? '<div class="logo"><img src="' . $logoDataUri . '" alt="Nurfa Beauty"></div>' : '';
-        $html .= '<h2>Laporan Penjualan</h2>';
+        $html .= '<table class="header"><tr><td class="header-logo">';
+        $html .= $logoDataUri !== '' ? '<img src="' . $logoDataUri . '" style="width:100px">' : '';
+        $html .= '</td><td class="header-text">';
+        $html .= '<div class="header-name">NURFA BEAUTY</div>';
+        $html .= '<div class="report-name">Laporan Penjualan</div>';
+        $html .= '</td></tr></table>';
         $html .= '<p>Periode: ' . date('d M Y', strtotime($startDate)) . ' - ' . date('d M Y', strtotime($endDate)) . '</p>';
 
-        $html .= '<h3>Ringkasan Penjualan</h3><table class="summary">';
-        $html .= '<tr><td>Total Pendapatan</td><td><strong>Rp ' . number_format((int) ($summary['total_revenue'] ?? 0), 0, ',', '.') . '</strong></td></tr>';
+        $html .= '<h3>Ringkasan Total Gabungan</h3><table class="summary">';
+        $html .= '<tr><td>Total Pendapatan (Online + Offline)</td><td><strong>Rp ' . number_format((int) ($summary['total_revenue'] ?? 0), 0, ',', '.') . '</strong></td></tr>';
+        $html .= '</table>';
+
+        $html .= '<h3>Ringkasan per Channel</h3><table class="summary">';
         $html .= '<tr><td>Total Transaksi</td><td><strong>' . (int) ($summary['total_transactions'] ?? 0) . ' transaksi</strong></td></tr>';
         $html .= '<tr><td>Beli Online</td><td><span class="badge-online">' . (int) ($summary['online_transactions'] ?? 0) . ' transaksi (Rp ' . number_format((int) ($summary['online_revenue'] ?? 0), 0, ',', '.') . ')</span></td></tr>';
         $html .= '<tr><td>Beli Offline (Toko)</td><td><span class="badge-offline">' . (int) ($summary['offline_transactions'] ?? 0) . ' transaksi (Rp ' . number_format((int) ($summary['offline_revenue'] ?? 0), 0, ',', '.') . ')</span></td></tr>';
-        $html .= '<tr><td>Rata-rata per Transaksi</td><td><strong>Rp ' . number_format((int) ($summary['avg_transaction'] ?? 0), 0, ',', '.') . '</strong></td></tr>';
         $html .= '</table>';
 
-        $html .= '<h3>Breakdown Harian (Beli Online vs Offline)</h3><table>';
-        $html .= '<tr><th>Tanggal</th><th>Total Transaksi</th><th>Beli Online</th><th>Beli Offline</th><th>Total Pendapatan</th></tr>';
-        foreach ($breakdown as $row) {
+        $html .= '<h3>Rincian Transaksi</h3><table>';
+        $html .= '<tr><th>Tanggal</th><th>Channel</th><th>Produk</th><th>Harga</th></tr>';
+        if (!isset($recentTransactions)) { $recentTransactions = []; }
+        foreach ($recentTransactions as $row) {
             $html .= '<tr>';
-            $html .= '<td>' . date('d M Y', strtotime($row['period_label'] ?? '')) . '</td>';
-            $html .= '<td>' . (int) ($row['transaction_count'] ?? 0) . '</td>';
-            $html .= '<td><span class="badge-online">' . (int) ($row['online_count'] ?? 0) . ' transaksi</span> (Rp ' . number_format((int) ($row['online_revenue'] ?? 0), 0, ',', '.') . ')</td>';
-            $html .= '<td><span class="badge-offline">' . (int) ($row['offline_count'] ?? 0) . ' transaksi</span> (Rp ' . number_format((int) ($row['offline_revenue'] ?? 0), 0, ',', '.') . ')</td>';
-            $html .= '<td><strong>Rp ' . number_format((int) ($row['period_revenue'] ?? 0), 0, ',', '.') . '</strong></td>';
+            $html .= '<td>' . date('d M Y', strtotime($row['transaction_date'])) . '</td>';
+            $html .= '<td>' . ($row['payment_method'] === 'offline' ? 'Offline' : 'Online') . '</td>';
+            $html .= '<td>' . esc($row['transaction_code']) . '</td>'; // Detail produk butuh join tambahan jika perlu
+            $html .= '<td>Rp ' . number_format((int) $row['final_amount'], 0, ',', '.') . '</td>';
             $html .= '</tr>';
         }
         $html .= '</table>';
@@ -686,10 +711,26 @@ class Report extends BaseController
 
         $logoDataUri = $this->getLogoDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f3f4f6;font-weight:600}h2{color:#E8A0BF}h3{margin-top:20px}.logo{margin-bottom:12px}.logo img{max-width:150px;height:auto}</style>';
+        $html .= '<style>
+            body{font-family:sans-serif;font-size:11px}
+            .header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;width:100%}
+            .header td{vertical-align:middle;border:none;padding:0}
+            .header-logo{width:100px;text-align:left}
+            .header-text{text-align:center;padding-right:20px}
+            .header-name{font-size:16px;font-weight:bold}
+            .report-name{font-size:12px;margin-top:4px}
+            table{width:100%;border-collapse:collapse;margin-bottom:18px}
+            th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}
+            th{background:#f3f4f6;font-weight:600}
+            h3{margin-top:14px;margin-bottom:6px}
+        </style>';
         $html .= '</head><body>';
-        $html .= $logoDataUri !== '' ? '<div class="logo"><img src="' . $logoDataUri . '" alt="Nurfa Beauty"></div>' : '';
-        $html .= '<h2>Laporan Pelanggan Nurfa Beauty</h2>';
+        $html .= '<table class="header"><tr><td class="header-logo">';
+        $html .= $logoDataUri !== '' ? '<img src="' . $logoDataUri . '" style="width:100px">' : '';
+        $html .= '</td><td class="header-text">';
+        $html .= '<div class="header-name">NURFA BEAUTY</div>';
+        $html .= '<div class="report-name">Laporan Pelanggan</div>';
+        $html .= '</td></tr></table>';
         $html .= '<p>Tanggal Cetak: ' . date('d M Y') . '</p>';
 
         $html .= '<h3>Ringkasan</h3><table>';
@@ -833,10 +874,26 @@ class Report extends BaseController
 
         $logoDataUri = $this->getLogoDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
-        $html .= '<style>body{font-family:sans-serif;font-size:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f3f4f6;font-weight:600}h2{color:#E8A0BF}h3{margin-top:20px}.logo{margin-bottom:12px}.logo img{max-width:150px;height:auto}</style>';
+        $html .= '<style>
+            body{font-family:sans-serif;font-size:11px}
+            .header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;width:100%}
+            .header td{vertical-align:middle;border:none;padding:0}
+            .header-logo{width:100px;text-align:left}
+            .header-text{text-align:center;padding-right:20px}
+            .header-name{font-size:16px;font-weight:bold}
+            .report-name{font-size:12px;margin-top:4px}
+            table{width:100%;border-collapse:collapse;margin-bottom:18px}
+            th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}
+            th{background:#f3f4f6;font-weight:600}
+            h3{margin-top:14px;margin-bottom:6px}
+        </style>';
         $html .= '</head><body>';
-        $html .= $logoDataUri !== '' ? '<div class="logo"><img src="' . $logoDataUri . '" alt="Nurfa Beauty"></div>' : '';
-        $html .= '<h2>Laporan Loyalitas</h2>';
+        $html .= '<table class="header"><tr><td class="header-logo">';
+        $html .= $logoDataUri !== '' ? '<img src="' . $logoDataUri . '" style="width:100px">' : '';
+        $html .= '</td><td class="header-text">';
+        $html .= '<div class="header-name">NURFA BEAUTY</div>';
+        $html .= '<div class="report-name">Laporan Loyalitas</div>';
+        $html .= '</td></tr></table>';
         $html .= '<p>Tanggal Cetak: ' . date('d M Y') . '</p>';
 
         $html .= '<h3>Ringkasan Poin</h3><table>';

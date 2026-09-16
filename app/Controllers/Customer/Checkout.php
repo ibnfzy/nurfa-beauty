@@ -318,8 +318,14 @@ class Checkout extends BaseController
             }
         }
 
-        // Hitung ongkos kirim (flat rate untuk sekarang)
-        $shippingCost = 0;
+        // Hitung ongkos kirim (flat rate berdasarkan kota)
+        $city = $defaultAddress['city'] ?? '';
+        $cityNormalized = strtolower(trim($city));
+        if ($cityNormalized === 'makassar') {
+            $shippingCost = 25000; // tarif flat dalam kota Makassar
+        } else {
+            $shippingCost = 45000; // tarif flat luar kota
+        }
 
         // Hitung total
         $totalAmount   = 0;

@@ -80,14 +80,16 @@
         <?= view('components/stat-card', [
             'title'   => 'Total Pendapatan',
             'value'   => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
-            'icon'    => 'dollar-sign',
+            'icon'    => 'Rp',
             'color'   => 'success',
+            'icontext' => true
         ]) ?>
         <?= view('components/stat-card', [
             'title'   => 'Total Transaksi',
             'value'   => number_format($totalTransactions, 0, ',', '.') . ' Transaksi',
-            'icon'    => 'receipt',
+            'icon'    => 'Rp',
             'color'   => 'info',
+            'icontext' => true
         ]) ?>
         <?= view('components/stat-card', [
             'title'   => 'Beli Online (Web)',
@@ -95,6 +97,7 @@
             'icon'    => 'globe',
             'color'   => 'primary',
             'footer'  => 'Omset: Rp ' . number_format($onlineRevenue ?? 0, 0, ',', '.'),
+            'icontext' => false
         ]) ?>
         <?= view('components/stat-card', [
             'title'   => 'Beli Offline (Toko)',
@@ -102,6 +105,7 @@
             'icon'    => 'store',
             'color'   => 'warning',
             'footer'  => 'Omset: Rp ' . number_format($offlineRevenue ?? 0, 0, ',', '.'),
+            'icontext' => false
         ]) ?>
     </div>
 
