@@ -96,7 +96,7 @@ class Cart extends BaseController
         $variants = !empty($product['variants']) ? json_decode((string) $product['variants'], true) : null;
         if (!empty($variants) && empty($variantSelection)) {
             return redirect()->back()
-                ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih varian produk sebelum menambahkan ke keranjang.']);
+                ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih minimal satu varian produk sebelum menambahkan ke keranjang.']);
         }
 
         // Validasi stok berdasarkan varian jika ada
@@ -109,13 +109,13 @@ class Cart extends BaseController
                 }
             }
 
-            if (!is_array($selectedVariant) || count($selectedVariant) !== count($available)) {
+            if (!is_array($selectedVariant) || count($selectedVariant) < 1) {
                 return redirect()->back()
-                    ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih semua varian produk.']);
+                    ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih minimal satu varian produk.']);
             }
 
-            foreach ($available as $name => $values) {
-                if (!isset($selectedVariant[$name]) || !in_array($selectedVariant[$name], $values, true)) {
+            foreach ($selectedVariant as $name => $value) {
+                if (!isset($available[$name]) || !in_array($value, $available[$name], true)) {
                     return redirect()->back()
                         ->with('toast', ['type' => 'error', 'message' => 'Varian yang dipilih tidak valid.']);
                 }

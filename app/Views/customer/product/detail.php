@@ -136,13 +136,13 @@
                     selectedVariant: {},
                     variantOptions: <?= esc(json_encode($variants ?? []), 'html') ?>,
                     variantError: '',
-                    hasAllVariantsSelected() {
-                        return Object.keys(this.variantOptions).length === Object.keys(this.selectedVariant).length
-                            && Object.keys(this.variantOptions).every(key => this.selectedVariant[key]);
+                    hasAtLeastOneVariantSelected() {
+                        return Object.keys(this.variantOptions).length === 0 
+                            || Object.values(this.selectedVariant).some(val => val && String(val).trim() !== '');
                     },
                     validateVariant() {
-                        this.variantError = Object.keys(this.variantOptions).length > 0 && !this.hasAllVariantsSelected()
-                            ? 'Silakan pilih semua varian produk terlebih dahulu.'
+                        this.variantError = Object.keys(this.variantOptions).length > 0 && !this.hasAtLeastOneVariantSelected()
+                            ? 'Silakan pilih minimal satu varian produk terlebih dahulu.'
                             : '';
                         return !this.variantError;
                     }

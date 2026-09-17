@@ -48,13 +48,16 @@ class Report extends BaseController
     /**
      * Return logo as base64 data URI for Dompdf (reliable without isRemoteEnabled).
      */
-    private function getLogoDataUri(): string
+    private function getKopSuratDataUri(): string
     {
-        $path = FCPATH . 'logo.png';
+        $path = FCPATH . 'kop-surat.jpeg';
+        if (! is_file($path)) {
+            $path = FCPATH . 'logo.png';
+        }
         if (! is_file($path)) {
             return '';
         }
-        $mime = function_exists('mime_content_type') ? (mime_content_type($path) ?: 'image/png') : 'image/png';
+        $mime = function_exists('mime_content_type') ? (mime_content_type($path) ?: 'image/jpeg') : 'image/jpeg';
         $data = @file_get_contents($path);
         if ($data === false || $data === '') {
             return '';
@@ -483,16 +486,26 @@ class Report extends BaseController
             ->get()
             ->getResultArray();
 
-        $logoDataUri = $this->getLogoDataUri();
+        $recentTransactions = $this->db->table('transactions')
+            ->select('transactions.*, customers.user_id, users.name as customer_name')
+            ->join('customers', 'customers.id = transactions.customer_id', 'left')
+            ->join('users', 'users.id = customers.user_id', 'left')
+            ->whereIn('transactions.status', ['completed', 'paid'])
+            ->where('transactions.transaction_date >=', $startDate . ' 00:00:00')
+            ->where('transactions.transaction_date <=', $endDate . ' 23:59:59')
+            ->orderBy('transactions.transaction_date', 'DESC')
+            ->limit(100)
+            ->get()
+            ->getResultArray();
+
+        $kopSuratDataUri = $this->getKopSuratDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
         $html .= '<style>
             body{font-family:sans-serif;font-size:11px}
-            .header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;width:100%}
-            .header td{vertical-align:middle;border:none;padding:0}
-            .header-logo{width:100px;text-align:left}
-            .header-text{text-align:center;padding-right:20px}
-            .header-name{font-size:16px;font-weight:bold}
-            .report-name{font-size:12px;margin-top:4px}
+            .header-kop{margin-bottom:15px;text-align:center}
+            .header-kop img{width:100%;max-height:120px}
+            .report-title{text-align:center;margin-bottom:15px}
+            .report-name{font-size:16px;font-weight:bold;text-transform:uppercase}
             table{width:100%;border-collapse:collapse;margin-bottom:18px}
             th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}
             th{background:#f3f4f6;font-weight:600}
@@ -506,12 +519,10 @@ class Report extends BaseController
             .sig-title{font-size:10px;color:#666}
         </style>';
         $html .= '</head><body>';
-        $html .= '<table class="header"><tr><td class="header-logo">';
-        $html .= $logoDataUri !== '' ? '<img src="' . $logoDataUri . '" style="width:100px">' : '';
-        $html .= '</td><td class="header-text">';
-        $html .= '<div class="header-name">NURFA BEAUTY</div>';
-        $html .= '<div class="report-name">Laporan Penjualan</div>';
-        $html .= '</td></tr></table>';
+        if ($kopSuratDataUri !== '') {
+            $html .= '<div class="header-kop"><img src="' . $kopSuratDataUri . '"></div>';
+        }
+        $html .= '<div class="report-title"><div class="report-name">Laporan Penjualan</div></div>';
         $html .= '<p>Periode: ' . date('d M Y', strtotime($startDate)) . ' - ' . date('d M Y', strtotime($endDate)) . '</p>';
 
         $html .= '<h3>Ringkasan Total Gabungan</h3><table class="summary">';
@@ -528,10 +539,30 @@ class Report extends BaseController
         $html .= '<tr><th>Tanggal</th><th>Channel</th><th>Produk</th><th>Harga</th></tr>';
         if (!isset($recentTransactions)) { $recentTransactions = []; }
         foreach ($recentTransactions as $row) {
+            $transactionItems = $this->db->table('transaction_items')
+                ->select('products.name as product_name, transaction_items.variant_selection, transaction_items.quantity')
+                ->join('products', 'products.id = transaction_items.product_id')
+                ->where('transaction_items.transaction_id', $row['id'])
+                ->get()
+                ->getResultArray();
+            
+            $productsList = [];
+            foreach ($transactionItems as $item) {
+                $productLabel = esc($item['product_name'] ?? '');
+                $variantSelection = $item['variant_selection'] ?? null;
+                if (is_string($variantSelection)) $variantSelection = json_decode($variantSelection, true);
+                if (is_array($variantSelection) && !empty($variantSelection)) {
+                    $variantLabel = implode(', ', array_map(static fn ($key, $value) => $key . ': ' . $value, array_keys($variantSelection), $variantSelection));
+                    $productLabel .= ' (' . esc($variantLabel) . ')';
+                }
+                $productLabel .= ' x' . (int)($item['quantity'] ?? 1);
+                $productsList[] = $productLabel;
+            }
+            
             $html .= '<tr>';
             $html .= '<td>' . date('d M Y', strtotime($row['transaction_date'])) . '</td>';
             $html .= '<td>' . ($row['payment_method'] === 'offline' ? 'Offline' : 'Online') . '</td>';
-            $html .= '<td>' . esc($row['transaction_code']) . '</td>'; // Detail produk butuh join tambahan jika perlu
+            $html .= '<td>' . (!empty($productsList) ? implode('<br>', $productsList) : esc($row['transaction_code'])) . '</td>';
             $html .= '<td>Rp ' . number_format((int) $row['final_amount'], 0, ',', '.') . '</td>';
             $html .= '</tr>';
         }
@@ -709,28 +740,24 @@ class Report extends BaseController
             ->limit(10)
             ->findAll();
 
-        $logoDataUri = $this->getLogoDataUri();
+        $kopSuratDataUri = $this->getKopSuratDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
         $html .= '<style>
             body{font-family:sans-serif;font-size:11px}
-            .header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;width:100%}
-            .header td{vertical-align:middle;border:none;padding:0}
-            .header-logo{width:100px;text-align:left}
-            .header-text{text-align:center;padding-right:20px}
-            .header-name{font-size:16px;font-weight:bold}
-            .report-name{font-size:12px;margin-top:4px}
+            .header-kop{margin-bottom:15px;text-align:center}
+            .header-kop img{width:100%;max-height:120px}
+            .report-title{text-align:center;margin-bottom:15px}
+            .report-name{font-size:16px;font-weight:bold;text-transform:uppercase}
             table{width:100%;border-collapse:collapse;margin-bottom:18px}
             th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}
             th{background:#f3f4f6;font-weight:600}
             h3{margin-top:14px;margin-bottom:6px}
         </style>';
         $html .= '</head><body>';
-        $html .= '<table class="header"><tr><td class="header-logo">';
-        $html .= $logoDataUri !== '' ? '<img src="' . $logoDataUri . '" style="width:100px">' : '';
-        $html .= '</td><td class="header-text">';
-        $html .= '<div class="header-name">NURFA BEAUTY</div>';
-        $html .= '<div class="report-name">Laporan Pelanggan</div>';
-        $html .= '</td></tr></table>';
+        if ($kopSuratDataUri !== '') {
+            $html .= '<div class="header-kop"><img src="' . $kopSuratDataUri . '"></div>';
+        }
+        $html .= '<div class="report-title"><div class="report-name">Laporan Pelanggan</div></div>';
         $html .= '<p>Tanggal Cetak: ' . date('d M Y') . '</p>';
 
         $html .= '<h3>Ringkasan</h3><table>';
@@ -872,28 +899,24 @@ class Report extends BaseController
         $totalVouchers = $this->voucherModel->countAllResults(false);
         $usedVouchers  = $this->voucherModel->where('is_used', 1)->countAllResults(false);
 
-        $logoDataUri = $this->getLogoDataUri();
+        $kopSuratDataUri = $this->getKopSuratDataUri();
         $html = '<!DOCTYPE html><html><head><meta charset="utf-8">';
         $html .= '<style>
             body{font-family:sans-serif;font-size:11px}
-            .header{border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:20px;width:100%}
-            .header td{vertical-align:middle;border:none;padding:0}
-            .header-logo{width:100px;text-align:left}
-            .header-text{text-align:center;padding-right:20px}
-            .header-name{font-size:16px;font-weight:bold}
-            .report-name{font-size:12px;margin-top:4px}
+            .header-kop{margin-bottom:15px;text-align:center}
+            .header-kop img{width:100%;max-height:120px}
+            .report-title{text-align:center;margin-bottom:15px}
+            .report-name{font-size:16px;font-weight:bold;text-transform:uppercase}
             table{width:100%;border-collapse:collapse;margin-bottom:18px}
             th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}
             th{background:#f3f4f6;font-weight:600}
             h3{margin-top:14px;margin-bottom:6px}
         </style>';
         $html .= '</head><body>';
-        $html .= '<table class="header"><tr><td class="header-logo">';
-        $html .= $logoDataUri !== '' ? '<img src="' . $logoDataUri . '" style="width:100px">' : '';
-        $html .= '</td><td class="header-text">';
-        $html .= '<div class="header-name">NURFA BEAUTY</div>';
-        $html .= '<div class="report-name">Laporan Loyalitas</div>';
-        $html .= '</td></tr></table>';
+        if ($kopSuratDataUri !== '') {
+            $html .= '<div class="header-kop"><img src="' . $kopSuratDataUri . '"></div>';
+        }
+        $html .= '<div class="report-title"><div class="report-name">Laporan Loyalitas</div></div>';
         $html .= '<p>Tanggal Cetak: ' . date('d M Y') . '</p>';
 
         $html .= '<h3>Ringkasan Poin</h3><table>';

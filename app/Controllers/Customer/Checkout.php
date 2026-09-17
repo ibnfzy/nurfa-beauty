@@ -307,9 +307,9 @@ class Checkout extends BaseController
 
             $variants = !empty($product['variants']) ? json_decode((string) $product['variants'], true) : [];
             $selection = !empty($item['variant_selection']) ? json_decode((string) $item['variant_selection'], true) : [];
-            if (!empty($variants) && (!is_array($selection) || count($selection) !== count($variants))) {
+            if (!empty($variants) && (!is_array($selection) || count($selection) < 1)) {
                 return redirect()->to('/cart')
-                    ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih semua varian produk sebelum checkout.']);
+                    ->with('toast', ['type' => 'error', 'message' => 'Silakan pilih minimal satu varian produk sebelum checkout.']);
             }
 
             if ($item['quantity'] > $product['stock']) {
