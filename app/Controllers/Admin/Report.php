@@ -227,13 +227,20 @@ class Report extends BaseController
             ->where('customers.created_at >=', date('Y-m-01'))
             ->countAllResults(false);
 
-        // Active customers (transacted in last 30 days)
-        $activeCustomers = $this->db->table('transactions')
-            ->select('COUNT(DISTINCT customer_id) as count')
-            ->whereIn('status', ['completed', 'paid'])
-            ->where('transaction_date >=', date('Y-m-d', strtotime('-30 days')))
-            ->get()
-            ->getRowArray();
+        // Active customers (akumulasi belanja bulan berjalan >= Rp 300.000)
+        $monthStart = date('Y-m-01') . ' 00:00:00';
+        $monthlySpendSub = "SELECT customer_id, SUM(final_amount) as month_total
+                            FROM transactions
+                            WHERE status IN ('completed','paid')
+                            AND transaction_date >= '{$monthStart}'
+                            GROUP BY customer_id";
+        
+        $activeCustomers = $this->db->query(
+            "SELECT COUNT(DISTINCT c.id) as count
+             FROM customers c
+             INNER JOIN ({$monthlySpendSub}) ms ON ms.customer_id = c.id
+             WHERE ms.month_total >= 300000"
+        )->getRowArray();
         $activeCount = (int) ($activeCustomers['count'] ?? 0);
 
         // Churn: customers with no purchase in last 90 days but had purchases before

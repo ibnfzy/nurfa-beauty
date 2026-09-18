@@ -226,8 +226,8 @@
                         $output .= '<div class="text-xs text-gray-500 mt-0.5">' . number_format($customer['loyalty_points'] ?? 0, 0, ',', '.') . ' poin</div>';
                         $output .= '</td>';
 
-                        // Total Belanja
-                        $output .= '<td class="py-3 px-4 text-xs font-semibold text-gray-800">Rp ' . number_format($customer['total_spending'] ?? 0, 0, ',', '.') . '</td>';
+                        // Belanja Bulan Ini
+                        $output .= '<td class="py-3 px-4 text-xs font-semibold text-gray-800">Rp ' . number_format($customer['monthly_total_spend'] ?? 0, 0, ',', '.') . '</td>';
 
                         // Aksi
                         $output .= '<td class="py-3 px-4">';
